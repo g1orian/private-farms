@@ -1,2 +1,2 @@
 # private-farms
-Private Farming Vaults
+Private Yield Farming Vaults
