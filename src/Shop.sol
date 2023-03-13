@@ -26,7 +26,7 @@ contract Shop {
 
     function produce(IFactory factory, bytes memory data, address payable affiliate)
     external payable returns (address deployedContract) {
-        if (msg.value < fee) revert WrongMsgValue();
+        if (msg.value != fee) revert WrongMsgValue();
         // transfer 50% to the affiliate
         if (affiliate != address(0)) affiliate.transfer(msg.value / 2);
         // transfer the rest to the owner
