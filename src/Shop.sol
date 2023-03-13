@@ -14,6 +14,7 @@ contract Shop {
 
     error AlreadyInitialized();
     error ZeroParameter();
+    error WrongMsgValue();
 
     function initialize(address owner_, uint fee_)
     external {
@@ -25,11 +26,16 @@ contract Shop {
 
     function produce(IFactory factory, bytes memory data, address payable affiliate)
     external payable returns (address deployedContract) {
-        // TODO check fees
-        // TODO transfer fees
+        if (msg.value < fee) revert WrongMsgValue();
+        // transfer 50% to the affiliate
+        if (affiliate != address(0)) affiliate.transfer(msg.value / 2);
+        // transfer the rest to the owner
+        owner.transfer(address(this).balance);
+
         deployedContract = factory.deploy(msg.sender, data);
         // push deployed contract address to the registry
         userContracts[msg.sender].push(deployedContract);
+        // TODO emit event
 
     }
 }
