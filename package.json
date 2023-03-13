@@ -1,0 +1,26 @@
+{
+  "name": "private-farms",
+  "version": "1.0.0",
+  "description": "Private Yield Farming Vaults",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "forge test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/g1orian/private-farms.git"
+  },
+  "author": "G1orian",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/g1orian/private-farms/issues"
+  },
+  "homepage": "https://github.com/g1orian/private-farms#readme",
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.8.2"
+  }
+}

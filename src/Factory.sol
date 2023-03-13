@@ -1,18 +1,20 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-// @title Proxies Factory Contract
+// @title Factory Contract
 // @notice Deploys proxy for specified implementation contract
-contract ProxiesFactory {
+contract Factory {
     address payable owner;
     uint fee;
 
     error AlreadyInitialized();
+    error ZeroParameter();
 
-    function initialize(uint fee_)
+    function initialize(address owner_, uint fee_)
     external {
         if (owner != address(0)) revert AlreadyInitialized();
-        owner = payable(msg.sender);
+        if (owner_ == address(0)) revert ZeroParameter();
+        owner = payable(owner_);
         fee = fee_;
         // TODO
     }
