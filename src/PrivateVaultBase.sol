@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 // @title Base Private Vault Contract
 // @notice initialize() used instead of constructor to work with proxy pattern
 abstract contract PrivateVaultBase {
-    address payable owner;
+    address owner;
 
     error AlreadyInitialized();
     error ZeroParameter();
@@ -16,5 +16,9 @@ abstract contract PrivateVaultBase {
         owner = payable(owner_);
         // TODO
     }
+
+    // TODO ether salvage
+    // TODO ERC20 salvage
+    // TODO NFT salvage
 
 }
