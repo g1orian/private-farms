@@ -5,6 +5,7 @@ import "../interfaces/IClonable.sol";
 import "../oz/access/Ownable.sol";
 
 // @dev Cloning Shop Contract
+// @author G1orian
 contract Shop is Ownable {
     uint public fee;
     mapping (address => address[]) public userContracts;
@@ -34,7 +35,7 @@ contract Shop is Ownable {
         return userContracts[user];
     }
 
-    function produce(IClonable clonable, address payable affiliate)
+    function produce(IClonable clonable, bytes memory initData, address payable affiliate)
     external payable returns (address clonedContract) {
         if (msg.value != fee) revert WrongValue();
         // transfer 50% to the the affiliate
@@ -43,7 +44,7 @@ contract Shop is Ownable {
         payable(owner()).transfer(address(this).balance);
 
         address user = msg.sender;
-        clonedContract = clonable.clone(user);
+        clonedContract = clonable.clone(user, initData);
         // push deployed contract address to the storage
         userContracts[user].push(clonedContract);
         emit Produced(address(clonable), clonedContract, user, affiliate, msg.value);
