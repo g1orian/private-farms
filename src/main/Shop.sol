@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import "./interfaces/IClonable.sol";
-import "./oz/access/Ownable.sol";
+import "../interfaces/IClonable.sol";
+import "../oz/access/Ownable.sol";
 
 // @title Shop Contract
 // @notice Produces contract by specified factory
