@@ -10,7 +10,7 @@ contract Shop {
     uint fee;
     mapping (address => address[]) public userContracts;
 
-    event Produced(address indexed factory, address indexed client, address indexed affiliate, uint feePaid);
+    event Produced(address indexed source, address clone, address indexed user, address indexed affiliate, uint feePaid);
     event FeeChanged(uint fee);
 
     error AlreadyInitialized();
@@ -44,16 +44,17 @@ contract Shop {
     }
 
     function produce(IClonable clonable, address payable affiliate)
-    external payable returns (address deployedContract) {
+    external payable returns (address clonedContract) {
         if (msg.value != fee) revert WrongValue();
         // transfer 50% to the affiliate
         if (affiliate != address(0)) affiliate.transfer(msg.value / 2);
         // transfer the rest to the owner
         owner.transfer(address(this).balance);
 
-        deployedContract = clonable.clone(msg.sender);
+        address user = msg.sender;
+        clonedContract = clonable.clone(user);
         // push deployed contract address to the registry
-        userContracts[msg.sender].push(deployedContract);
-        emit Produced(address(clonable), msg.sender, affiliate, msg.value);
+        userContracts[user].push(clonedContract);
+        emit Produced(address(clonable), clonedContract, user, affiliate, msg.value);
     }
 }
