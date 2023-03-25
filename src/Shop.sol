@@ -10,23 +10,42 @@ contract Shop {
     uint fee;
     mapping (address => address[]) public userContracts;
 
-    // TODO add events
+    event Produced(address indexed factory, address indexed client, address indexed affiliate, uint feePaid);
+    event FeeChanged(uint fee);
 
     error AlreadyInitialized();
     error ZeroParameter();
-    error WrongMsgValue();
+    error NotOwner();
+    error WrongValue();
+
+    modifier onlyOwner() {
+        if (msg.sender != owner)
+            revert NotOwner();
+        else _;
+    }
 
     function initialize(address owner_, uint fee_)
     external {
         if (owner != address(0)) revert AlreadyInitialized();
         if (owner_ == address(0)) revert ZeroParameter();
         owner = payable(owner_);
+        setFee(fee_);
+    }
+
+    function setFee(uint fee_)
+    onlyOwner public {
         fee = fee_;
+        emit FeeChanged(fee_);
+    }
+
+    function getAllUserContracts(address user)
+    external view returns (address[] memory) {
+        return userContracts[user];
     }
 
     function produce(IFactory factory, bytes memory data, address payable affiliate)
     external payable returns (address deployedContract) {
-        if (msg.value != fee) revert WrongMsgValue();
+        if (msg.value != fee) revert WrongValue();
         // transfer 50% to the affiliate
         if (affiliate != address(0)) affiliate.transfer(msg.value / 2);
         // transfer the rest to the owner
@@ -35,7 +54,6 @@ contract Shop {
         deployedContract = factory.deploy(msg.sender, data);
         // push deployed contract address to the registry
         userContracts[msg.sender].push(deployedContract);
-        // TODO emit event
-
+        emit Produced(address(factory), msg.sender, affiliate, msg.value);
     }
 }
