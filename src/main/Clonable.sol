@@ -12,7 +12,7 @@ contract Clonable is IClonable, Ownable {
 
     event Cloned(address cloneContract, address indexed forClient);
 
-    error AlreadyInitialized();
+    error CloneAlreadyInitialized();
     error NotMotherContract();
 
     constructor() Ownable() {
@@ -29,7 +29,7 @@ contract Clonable is IClonable, Ownable {
 
     function initClone(address client)
     external override virtual {
-        if (owner() != address(0)) revert AlreadyInitialized();
+        if (owner() != address(0)) revert CloneAlreadyInitialized();
         _transferOwnership(client);
     }
 

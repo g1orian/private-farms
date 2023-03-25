@@ -10,7 +10,22 @@ import "./Clonable.sol";
 // @notice initialize() used instead of constructor to work with proxy pattern
 abstract contract PrivateVaultBase is Clonable, ERC4626 {
 
+    address public worker;
+
+    event WorkerChanged(address worker);
+
     constructor(IERC20 asset_) ERC4626(asset_) {
+    }
+
+    modifier onlyWorkerOrOwner() {
+        require(worker == _msgSender() || owner() == _msgSender(), "PrivateVault: not worker or owner");
+        _;
+    }
+
+    function setWorker(address worker_)
+    onlyOwner external {
+        worker = worker_;
+        emit WorkerChanged(worker_);
     }
 
     function deposit(uint256 assets, address receiver)
@@ -33,6 +48,12 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
         return super.redeem(shares, receiver, owner);
     }
 
+    function doHardWork()
+    onlyWorkerOrOwner external {
+        _doHardWork();
+    }
+
+    function _doHardWork() internal virtual;
 
     // TODO ether salvage
     // TODO ERC20 salvage

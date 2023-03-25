@@ -4,10 +4,9 @@ pragma solidity ^0.8.13;
 import "../interfaces/IClonable.sol";
 import "../oz/access/Ownable.sol";
 
-// @title Shop Contract
-// @notice Produces contract by specified factory
+// @dev Cloning Shop Contract
 contract Shop is Ownable {
-    uint fee;
+    uint public fee;
     mapping (address => address[]) public userContracts;
 
     event Produced(address indexed source, address clone, address indexed user, address indexed affiliate, uint feePaid);
@@ -33,7 +32,7 @@ contract Shop is Ownable {
     function produce(IClonable clonable, address payable affiliate)
     external payable returns (address clonedContract) {
         if (msg.value != fee) revert WrongValue();
-        // transfer 50% to the affiliate
+        // transfer 50% to the the affiliate
         if (affiliate != address(0)) affiliate.transfer(msg.value / 2);
         // transfer the rest to the owner
         payable(owner()).transfer(address(this).balance);
