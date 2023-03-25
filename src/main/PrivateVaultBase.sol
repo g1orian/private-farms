@@ -17,11 +17,13 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
 
     event WorkerChanged(address worker);
 
+    error NotWorker();
+
     constructor(IERC20 asset_) ERC4626(asset_) {
     }
 
     modifier onlyWorkerOrOwner() {
-        require(worker == msg.sender || owner() == msg.sender, "PrivateVault: not worker or owner");
+        if (worker != msg.sender || owner() != msg.sender) revert NotWorker();
         _;
     }
 
@@ -75,8 +77,46 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
         IERC721(token).transferFrom(address(this), msg.sender, tokenId);
     }
 
-    // ******** HARD WORK *********
+    // ******** DEPOSIT / WITHDRAW ********
 
-    function _doHardWork() internal virtual;
+
+    /**
+     * @dev Deposit/mint common workflow.
+     */
+    function _deposit(address caller, address receiver, uint256 assets, uint256 shares)
+    internal virtual {
+        super._deposit(caller, receiver, assets, shares);
+        // TODO _invest() all available assets
+    }
+
+    /**
+     * @dev Withdraw/redeem common workflow.
+     */
+    function _withdraw(address caller, address receiver, address owner, uint256 assets, uint256 shares)
+    internal virtual {
+        // TODO  _devest() needed assets amount
+        super._wirthdraw(caller, receiver, owner, assets, shares);
+    }
+
+    // ******** TO IMPLEMENT *********
+
+
+    function _deposit(uint256 assets, address receiver)
+    internal returns (uint256 shares) {
+        return super.deposit(assets, receiver);
+    }
+
+    function totalAssets() public view virtual override returns (uint256) {
+        return _asset.balanceOf(address(this));
+    }
+
+    function _doHardWork() internal virtual {
+        // claim rewards
+        // convert rewards to asset
+        // invest all asset balance
+    }
+
+
+
 
 }
