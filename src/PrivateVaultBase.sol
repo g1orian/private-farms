@@ -3,16 +3,37 @@ pragma solidity ^0.8.13;
 
 import "./oz/token/ERC20/extensions/ERC4626.sol";
 import "./oz/access/Ownable.sol";
+import "./oz/proxy/Clones.sol";
+import "./interfaces/IClonable.sol";
 
 // @title Base Private Vault Contract
 // @notice initialize() used instead of constructor to work with proxy pattern
-abstract contract PrivateVaultBase is Ownable, ERC4626 {
+abstract contract PrivateVaultBase is IClonable, Ownable, ERC4626 {
+
+    bool private motherContract; // it will be false at cloned contracts
+
+    event Cloned(address cloneContract, address indexed forClient);
 
     error AlreadyInitialized();
     error ZeroParameter();
+    error NotMotherContract();
 
     constructor(IERC20 asset_) Ownable() ERC4626(asset_) {
+        motherContract = true;
+    }
 
+    function clone(address client)
+    onlyOwner external override returns (address newClone) {
+        if (!motherContract) revert NotMotherContract();
+        newClone = Clones.clone(address(this));
+        PrivateVaultBase(newClone).initClone(client);
+        emit Cloned(newClone, client);
+    }
+
+    function initClone(address client)
+    external override virtual {
+        if (owner() != address(0)) revert AlreadyInitialized();
+        _transferOwnership(client);
     }
 
     function deposit(uint256 assets, address receiver)

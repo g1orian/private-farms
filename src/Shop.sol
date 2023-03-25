@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import "./interfaces/IFactory.sol";
+import "./interfaces/IClonable.sol";
 
 // @title Shop Contract
 // @notice Produces contract by specified factory
@@ -43,7 +43,7 @@ contract Shop {
         return userContracts[user];
     }
 
-    function produce(IFactory factory, bytes memory data, address payable affiliate)
+    function produce(IClonable clonable, address payable affiliate)
     external payable returns (address deployedContract) {
         if (msg.value != fee) revert WrongValue();
         // transfer 50% to the affiliate
@@ -51,9 +51,9 @@ contract Shop {
         // transfer the rest to the owner
         owner.transfer(address(this).balance);
 
-        deployedContract = factory.deploy(msg.sender, data);
+        deployedContract = clonable.clone(msg.sender);
         // push deployed contract address to the registry
         userContracts[msg.sender].push(deployedContract);
-        emit Produced(address(factory), msg.sender, affiliate, msg.value);
+        emit Produced(address(clonable), msg.sender, affiliate, msg.value);
     }
 }
