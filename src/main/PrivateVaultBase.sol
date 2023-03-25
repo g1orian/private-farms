@@ -4,11 +4,14 @@ pragma solidity ^0.8.13;
 import "../oz/token/ERC20/extensions/ERC4626.sol";
 import "../oz/access/Ownable.sol";
 import "../oz/proxy/Clones.sol";
+import "../oz/token/ERC20/utils/SafeERC20.sol";
+import "../oz/token/ERC721/IERC721.sol";
 import "./Clonable.sol";
 
 // @title Base Private Vault Contract
 // @notice initialize() used instead of constructor to work with proxy pattern
 abstract contract PrivateVaultBase is Clonable, ERC4626 {
+    using SafeERC20 for IERC20;
 
     address public worker;
 
@@ -53,10 +56,27 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
         _doHardWork();
     }
 
-    function _doHardWork() internal virtual;
+    // ******** SALVAGE *********
 
-    // TODO ether salvage
-    // TODO ERC20 salvage
-    // TODO NFT salvage
+    function salvage(uint amount)
+    onlyOwner external {
+        if (amount == 0) amount = address(this).balance;
+        payable(msg.sender).transfer(amount);
+    }
+
+    function salvageERC20(address token, uint amount)
+    onlyOwner external {
+        if (amount == 0) amount = IERC20(token).balanceOf(address(this));
+        IERC20(token).safeTransfer(msg.sender, amount);
+    }
+
+    function salvageERC721(address token, uint tokenId)
+    onlyOwner external {
+        IERC721(token).transferFrom(address(this), msg.sender, tokenId);
+    }
+
+    // ******** HARD WORK *********
+
+    function _doHardWork() internal virtual;
 
 }
