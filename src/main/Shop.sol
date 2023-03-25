@@ -24,6 +24,11 @@ contract Shop is Ownable {
         emit FeeChanged(fee_);
     }
 
+    function returnOwnership(address contractAddress)
+    onlyOwner public {
+        Ownable(contractAddress).transferOwnership(msg.sender);
+    }
+
     function getAllUserContracts(address user)
     external view returns (address[] memory) {
         return userContracts[user];

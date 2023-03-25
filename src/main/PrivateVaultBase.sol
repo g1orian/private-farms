@@ -18,7 +18,7 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
     }
 
     modifier onlyWorkerOrOwner() {
-        require(worker == _msgSender() || owner() == _msgSender(), "PrivateVault: not worker or owner");
+        require(worker == msg.sender || owner() == msg.sender, "PrivateVault: not worker or owner");
         _;
     }
 
