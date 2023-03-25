@@ -2,37 +2,25 @@
 pragma solidity ^0.8.13;
 
 import "./interfaces/IFactory.sol";
+import "./oz/access/Ownable.sol";
 
 // @title Base Factory Contract
-abstract contract FactoryBase is IFactory {
-    address owner;
+abstract contract FactoryBase is IFactory, Ownable {
 
-    error AlreadyInitialized();
-    error ZeroParameter();
-    error NotOwner();
+    event Deployed(address client);
 
-    // TODO add events
-
-    modifier onlyOwner() {
-        if (msg.sender != owner)
-            revert NotOwner();
-        else _;
-    }
-
-    function initialize(address owner_, uint fee_)
-    external {
-        if (owner != address(0)) revert AlreadyInitialized();
-        if (owner_ == address(0)) revert ZeroParameter();
-        owner = payable(owner_);
+    constructor () Ownable() {
     }
 
     function deploy(address client, bytes memory data)
     onlyOwner external returns (address deployedContract) {
         deployedContract = _deploy(client, data);
+        emit Deployed(client);
     }
 
-    // TO IMPLEMENT
-
+    /**
+     * @dev Implement this function for specific factory.
+     */
     function _deploy(address client, bytes memory data)
     internal virtual returns (address deployedContract);
 

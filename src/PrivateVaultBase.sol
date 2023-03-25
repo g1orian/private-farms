@@ -11,15 +11,29 @@ abstract contract PrivateVaultBase is Ownable, ERC4626 {
     error AlreadyInitialized();
     error ZeroParameter();
 
-    function initialize(address owner_)
-    external {
-        if (owner() != address(0)) revert AlreadyInitialized();
-        _transferOwnership(owner_);
-        // TODO
+    constructor(IERC20 asset_) Ownable() ERC4626(asset_) {
+
     }
 
-//    function deposit(uint256 assets, address receiver)
-//    external override returns (uint256 shares)
+    function deposit(uint256 assets, address receiver)
+    onlyOwner public override returns (uint256 shares) {
+        return super.deposit(assets, receiver);
+    }
+
+    function mint(uint256 shares, address receiver)
+    onlyOwner public override returns (uint256 assets) {
+        return super.mint(shares, receiver);
+    }
+
+    function withdraw(uint256 assets, address receiver, address owner)
+    onlyOwner public override returns (uint256 shares) {
+        return super.withdraw(assets, receiver, owner);
+    }
+
+    function redeem(uint256 shares, address receiver, address owner)
+    onlyOwner public override returns (uint256 assets) {
+        return super.redeem(shares, receiver, owner);
+    }
 
 
     // TODO ether salvage
