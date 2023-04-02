@@ -9,7 +9,6 @@ import "../oz/token/ERC721/IERC721.sol";
 import "./Clonable.sol";
 
 // @title Base Private Vault Contract
-// @notice initialize() used instead of constructor to work with proxy pattern
 // @author G1orian
 abstract contract PrivateVaultBase is Clonable, ERC4626 {
     using SafeERC20 for IERC20;
@@ -19,13 +18,13 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
 
     event WorkerChanged(address worker);
 
-    error NotWorker();
+    error NotWorkerOrOwner();
 
     constructor(IERC20 asset_) ERC4626(asset_) {
     }
 
     modifier onlyWorkerOrOwner() {
-        if (worker != msg.sender || owner() != msg.sender) revert NotWorker();
+        if (worker != msg.sender || owner() != msg.sender) revert NotWorkerOrOwner();
         _;
     }
 
@@ -63,6 +62,8 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
         return super.redeem(shares, receiver, owner);
     }
 
+    // ******** ONLY WORKER OR OWNER *********
+
     function doHardWork()
     onlyWorkerOrOwner external {
         _doHardWork();
@@ -70,18 +71,34 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
 
     // ******** SALVAGE *********
 
+    /**
+     * @dev Salvage network token from this contract.
+     * @param amount amount of the token to salvage
+     *  - when 0, will salvage all tokens
+     */
     function salvage(uint amount)
     onlyOwner external {
         if (amount == 0) amount = address(this).balance;
         payable(msg.sender).transfer(amount);
     }
 
+    /**
+     * @dev Salvage any ERC20 token from this contract.
+     * @param token address of the token to salvage
+     * @param amount amount of the token to salvage
+     *  - when 0, will salvage all tokens
+     */
     function salvageERC20(address token, uint amount)
     onlyOwner external {
         if (amount == 0) amount = IERC20(token).balanceOf(address(this));
         IERC20(token).safeTransfer(msg.sender, amount);
     }
 
+    /**
+     * @dev Salvage any ERC721 token from this contract.
+     * @param token address of the token to salvage
+     * @param tokenId id of the token to salvage
+     */
     function salvageERC721(address token, uint tokenId)
     onlyOwner external {
         IERC721(token).transferFrom(address(this), msg.sender, tokenId);
@@ -96,6 +113,10 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
 
     /**
      * @dev Deposit/mint common workflow.
+     * @param caller who called deposit/mint
+     * @param receiver who should receive shares
+     * @param assets amount of assets to deposit/mint
+     * @param shares amount of shares to mint
      */
     function _deposit(address caller, address receiver, uint assets, uint shares)
     internal override virtual {
@@ -105,7 +126,12 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
     }
 
     /**
-     * @dev Withdraw/redeem common workflow.
+     * @dev Withdraw/redeem common workflow.\
+     * @param caller who called withdraw/redeem
+     * @param receiver who should receive assets
+     * @param owner who should receive shares
+     * @param assets amount of assets to withdraw/redeem
+     * @param shares amount of shares to redeem
      */
     function _withdraw(address caller, address receiver, address owner, uint assets, uint shares)
     internal override virtual {
@@ -114,25 +140,33 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
         super._withdraw(caller, receiver, owner, assets, shares);
     }
 
+    /**
+     * @dev Should return total assets (free + invested)
+     */
     function totalAssets() public view virtual override returns (uint) {
         return IERC20(asset()).balanceOf(address(this)) + investedAssets();
     }
 
+    // *******************************
     // ******** TO IMPLEMENT *********
+    // *******************************
 
     /**
      * @dev Should return how much assets invested / staked
+     *    - used to calculate total assets
      */
     function investedAssets() public view virtual returns (uint);
 
     /**
      * @dev Should invest / stake free assets from the vault
+     * @param assets amount of assets to invest
      */
     function _invest(uint assets) internal virtual;
 
     /**
      * @dev Should de-vest / un-stake assets from the underlying protocol to the vault
      *    - if available amount less then requested, then do not revert and withdraw all available
+     * @param assets amount of assets to de-vest
      */
     function _devest(uint assets) internal virtual;
 

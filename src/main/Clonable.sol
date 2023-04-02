@@ -9,7 +9,9 @@ import "../interfaces/IClonable.sol";
 // @author G1orian
 contract Clonable is IClonable, Ownable {
 
+    /// @dev true if this is mother contract
     bool private motherContract; // it will be false at cloned contracts
+    /// @dev address of the contract developer (to share revenue)
     address payable public immutable override developer;
 
     event Cloned(address cloneContract, address indexed forClient);
@@ -18,11 +20,20 @@ contract Clonable is IClonable, Ownable {
     error NotMotherContract();
     error WrongInitData();
 
+    /**
+     * @dev Constructor
+     * @param developer_ address of the contract developer (to share revenue)
+     */
     constructor(address payable developer_) Ownable() {
         motherContract = true;
         developer = developer_;
     }
 
+    /**
+     * @dev Clone mother contract
+     * @param cloneOwner address of the new contract owner
+     * @param initData data to init new contract
+     */
     function clone(address cloneOwner, bytes memory initData)
     onlyOwner external override returns (address newClone) {
         if (!motherContract) revert NotMotherContract();
@@ -32,7 +43,9 @@ contract Clonable is IClonable, Ownable {
     }
 
     /**
-     * @dev Initializes fresh clone with
+     * @dev Initializes fresh clone with specific data
+     * @param cloneOwner address of the new contract owner
+     * @param initData data to init new contract
      */
     function initClone(address cloneOwner, bytes memory initData)
     external override virtual {
@@ -42,7 +55,8 @@ contract Clonable is IClonable, Ownable {
     }
 
     /**
-     * @dev Override this function to init clone this specific data
+     * @dev Override this function to init clone with specific data
+     * @param initData data to init new contract
      */
     function _initCloneWithData(bytes memory initData)
     internal virtual {

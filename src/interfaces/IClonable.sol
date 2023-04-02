@@ -3,10 +3,22 @@ pragma solidity ^0.8.13;
 
 // @author G1orian
 interface IClonable {
-    // @dev address of the contract developer (to share revenue)
+    /**
+     * @dev address of the contract developer (to share revenue)
+     */
     function developer() external returns (address payable);
-    // @dev called on mother contract
+
+    /**
+     * @notice call on mother contract
+     * @param client address of the new contract owner
+     * @param initData data to init new contract
+     */
     function clone(address client, bytes memory initData) external returns (address newClone);
-    // @dev called on cloned contract
+
+    /**
+     * @notice call on cloned contract
+     * @param client address of the new contract owner
+     * @param initData data to init new contract
+     */
     function initClone(address client, bytes memory initData) external;
 }
