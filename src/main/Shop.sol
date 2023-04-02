@@ -7,8 +7,12 @@ import "../oz/access/Ownable.sol";
 // @dev Cloning Shop Contract
 // @author G1orian
 contract Shop is Ownable {
+    // @dev fee for cloning
     uint public fee;
+    // @dev user => contracts
     mapping (address => address[]) public userContracts;
+    // @dev user => affiliate
+    mapping (address => address payable) public userAffiliates;
 
     event Produced(address indexed source, address clone, address indexed user, address indexed affiliate, uint feePaid);
     event FeeChanged(uint fee);
@@ -57,10 +61,19 @@ contract Shop is Ownable {
     external payable returns (address clonedContract) {
         if (msg.value != fee) revert WrongValue();
         // transfer 50% to the the affiliate
-        if (affiliate != address(0)) affiliate.transfer(msg.value / 2);
-        // transfer 50% to the the cloned contract developer
+        address payable userAffiliate = userAffiliates[msg.sender];
+        // if affiliate is set for the user, override affiliate parameter, to use first set affiliate
+        if (userAffiliate != address(0)) affiliate = userAffiliate;
+        if (affiliate != address(0)) {
+            // store affiliate for the user's next transactions
+            userAffiliates[msg.sender] = affiliate;
+            affiliate.transfer(msg.value / 2);
+        }
+        // transfer 50% of the balance to the the contract developer
         address payable developer = clonable.developer();
-        if (developer != address(0)) developer.transfer(msg.value / 2);
+        if (developer != address(0)) {
+            developer.transfer(address(this).balance / 2);
+        }
         // transfer the rest to the owner
         payable(owner()).transfer(address(this).balance);
 
