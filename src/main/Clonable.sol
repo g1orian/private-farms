@@ -10,6 +10,7 @@ import "../interfaces/IClonable.sol";
 contract Clonable is IClonable, Ownable {
 
     bool private motherContract; // it will be false at cloned contracts
+    address payable public immutable override developer;
 
     event Cloned(address cloneContract, address indexed forClient);
 
@@ -17,8 +18,9 @@ contract Clonable is IClonable, Ownable {
     error NotMotherContract();
     error WrongInitData();
 
-    constructor() Ownable() {
+    constructor(address payable developer_) Ownable() {
         motherContract = true;
+        developer = developer_;
     }
 
     function clone(address cloneOwner, bytes memory initData)

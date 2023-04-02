@@ -40,6 +40,9 @@ contract Shop is Ownable {
         if (msg.value != fee) revert WrongValue();
         // transfer 50% to the the affiliate
         if (affiliate != address(0)) affiliate.transfer(msg.value / 2);
+        // transfer 50% to the the cloned contract developer
+        address payable developer = clonable.developer();
+        if (developer != address(0)) developer.transfer(msg.value / 2);
         // transfer the rest to the owner
         payable(owner()).transfer(address(this).balance);
 
