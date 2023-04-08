@@ -13,6 +13,9 @@ import "./Clonable.sol";
 abstract contract PrivateVaultBase is Clonable, ERC4626 {
     using SafeERC20 for IERC20;
 
+    // @dev name of the vault
+    public string name;
+
     // @dev who can call doHardWork()
     address public worker;
 
