@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import "../oz/token/ERC20/extensions/ERC4626.sol";
-import "../oz/access/Ownable.sol";
-import "../oz/proxy/Clones.sol";
-import "../oz/token/ERC20/utils/SafeERC20.sol";
-import "../oz/token/ERC721/IERC721.sol";
+import "../openzeppelin/token/ERC20/extensions/ERC4626.sol";
+import "../openzeppelin/access/Ownable.sol";
+import "../openzeppelin/proxy/Clones.sol";
+import "../openzeppelin/token/ERC20/utils/SafeERC20.sol";
+import "../openzeppelin/token/ERC721/IERC721.sol";
 import "./Clonable.sol";
 
 // @title Base Private Vault Contract
@@ -13,8 +13,8 @@ import "./Clonable.sol";
 abstract contract PrivateVaultBase is Clonable, ERC4626 {
     using SafeERC20 for IERC20;
 
-    // @dev name of the vault
-    public string name;
+    // @dev name of the vault's strategy
+    string public strategyName;
 
     // @dev who can call doHardWork()
     address public worker;

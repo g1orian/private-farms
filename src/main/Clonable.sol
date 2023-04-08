@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import "../oz/access/Ownable.sol";
-import "../oz/proxy/Clones.sol";
+import "../openzeppelin/access/Ownable.sol";
+import "../openzeppelin/proxy/Clones.sol";
 import "../interfaces/IClonable.sol";
 
 // @title Base Clonable Contract
