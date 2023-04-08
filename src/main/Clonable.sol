@@ -36,7 +36,8 @@ contract Clonable is IClonable, Ownable {
      */
     function clone(address cloneOwner, bytes memory initData)
     onlyOwner external override returns (address newClone) {
-        if (!motherContract) revert NotMotherContract();
+        if (!motherContract)
+            revert NotMotherContract();
         newClone = Clones.clone(address(this));
         IClonable(newClone).initClone(cloneOwner, initData);
         emit Cloned(newClone, cloneOwner);
@@ -49,7 +50,8 @@ contract Clonable is IClonable, Ownable {
      */
     function initClone(address cloneOwner, bytes memory initData)
     external override virtual {
-        if (owner() != address(0)) revert CloneAlreadyInitialized();
+        if (owner() != address(0))
+            revert CloneAlreadyInitialized();
         _transferOwnership(cloneOwner);
         _initCloneWithData(initData);
     }

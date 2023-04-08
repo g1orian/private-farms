@@ -99,4 +99,47 @@ contract ShopTest is Test {
         assertEq(clone.owner(), address(this));
     }
 
+    function test_produceWrongValue() public {
+        bytes memory initData;
+
+        vm.expectRevert(Shop.WrongValue.selector);
+        shop.produce{value: 0}(clonable, initData, zeroAddress);
+    }
+
+    function test_produceNotMother() public {
+        bytes memory initData;
+        serviceRevenue = fee;
+
+        Clonable clone = Clonable(
+            shop.produce{value: fee}(clonableNoDev, initData, zeroAddress)
+        );
+        clone.transferOwnership(address(shop));
+        vm.expectRevert(Clonable.NotMotherContract.selector);
+        shop.produce{value: fee}(clone, initData, zeroAddress);
+    }
+
+    function test_produceCloneAlreadyInitialized() public {
+        bytes memory initData;
+        serviceRevenue = fee;
+
+        Clonable clone = Clonable(
+            shop.produce{value: fee}(clonableNoDev, initData, zeroAddress)
+        );
+        vm.expectRevert(Clonable.CloneAlreadyInitialized.selector);
+        clone.initClone(address(this), initData);
+    }
+
+    function test_getAllUserContracts() public {
+        bytes memory initData;
+        assertEq(shop.getAllUserContracts(address(this)).length, 0);
+
+        serviceRevenue = fee / 2;
+        shop.produce{value: fee}(clonable, initData, zeroAddress);
+        assertEq(shop.getAllUserContracts(address(this)).length, 1);
+
+        serviceRevenue = fee;
+        shop.produce{value: fee}(clonableNoDev, initData, zeroAddress);
+        assertEq(shop.getAllUserContracts(address(this)).length, 2);
+    }
+
 }
