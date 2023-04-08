@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "../interfaces/IClonable.sol";
-import "../oz/access/Ownable.sol";
+import "../openzeppelin/access/Ownable.sol";
 
 // @dev Cloning Shop Contract
 // @author G1orian
