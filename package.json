@@ -8,7 +8,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "forge test"
+    "test": "forge test -vvv"
   },
   "repository": {
     "type": "git",

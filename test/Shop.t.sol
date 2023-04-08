@@ -16,7 +16,7 @@ contract ShopTest is Test {
     uint public fee = 100;
     uint public shouldReceive;
 
-    fallback() external payable {
+    receive() external payable {
         assertEq(shouldReceive, msg.value);
     }
 
@@ -28,14 +28,14 @@ contract ShopTest is Test {
         clonable.transferOwnership(address(shop));
     }
 
-    function test_setFee(uint fee) public {
-        shop.setFee(fee);
-        assertEq(shop.fee(), fee);
+    function test_setFee(uint newFee) public {
+        shop.setFee(newFee);
+        assertEq(shop.fee(), newFee);
     }
 
-    function testFail_setFee(uint fee) public {
+    function testFail_setFee(uint newFee) public {
         vm.prank(address(0));
-        shop.setFee(fee);
+        shop.setFee(newFee);
     }
 
     function test_returnOwnership() public {
