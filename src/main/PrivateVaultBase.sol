@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import "../openzeppelin/token/ERC20/extensions/ERC4626.sol";
-import "../openzeppelin/access/Ownable.sol";
-import "../openzeppelin/proxy/Clones.sol";
-import "../openzeppelin/token/ERC20/utils/SafeERC20.sol";
-import "../openzeppelin/token/ERC721/IERC721.sol";
+import "openzeppelin-contracts/contracts/token/ERC20/extensions/ERC4626.sol";
+import "openzeppelin-contracts/contracts/access/Ownable.sol";
+import "openzeppelin-contracts/contracts/proxy/Clones.sol";
+import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
+import "openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
 import "./Clonable.sol";
 
 // @title Base Private Vault Contract
