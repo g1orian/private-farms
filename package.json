@@ -15,14 +15,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/g1orian/private-farms.git"
+    "url": "git+https://github.com/privatevaults/privatevaults-contracts.git"
   },
   "author": "G1orian",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/g1orian/private-farms/issues"
+    "url": "https://github.com/privatevaults/privatevaults-contracts/issues"
   },
-  "homepage": "https://github.com/g1orian/private-farms#readme",
+  "homepage": "https://github.com/privatevaults/privatevaults-contracts#readme",
   "dependencies": {
     "@openzeppelin/contracts": "^4.8.2"
   }
