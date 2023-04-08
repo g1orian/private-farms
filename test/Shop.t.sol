@@ -14,18 +14,20 @@ contract ShopTest is Test {
     address payable public affiliate = payable(makeAddr("affiliate"));
     address payable public zeroAddress = payable(address(0));
     uint public fee = 100;
-    uint public shouldReceive;
+    uint public serviceRevenue;
 
     receive() external payable {
-        assertEq(shouldReceive, msg.value);
+        assertEq(serviceRevenue, msg.value);
     }
 
     function setUp() public {
         shop = new Shop(fee);
 
         clonable = new Clonable(developer);
-        clonableNoDev = new Clonable(zeroAddress);
         clonable.transferOwnership(address(shop));
+
+        clonableNoDev = new Clonable(zeroAddress);
+        clonableNoDev.transferOwnership(address(shop));
     }
 
     function test_setFee(uint newFee) public {
@@ -49,12 +51,49 @@ contract ShopTest is Test {
         shop.returnOwnership(address(clonable));
     }
 
-    function test_produce() public {
+    function test_produceWithAffiliate() public {
         bytes memory initData;
-        shouldReceive = fee / 2;
+        serviceRevenue = fee / 4;
+
+        Clonable clone = Clonable(
+            shop.produce{value: fee}(clonable, initData, affiliate)
+        );
+
+        assertEq(clone.owner(), address(this));
+        assertEq(developer.balance, fee / 4);
+        assertEq(affiliate.balance, fee / 2);
+    }
+
+    function test_produceNoAffiliate() public {
+        bytes memory initData;
+        serviceRevenue = fee / 2;
 
         Clonable clone = Clonable(
             shop.produce{value: fee}(clonable, initData, zeroAddress)
+        );
+
+        assertEq(clone.owner(), address(this));
+        assertEq(developer.balance, fee / 2);
+    }
+
+    function test_produceNoDevWithAffiliate() public {
+        bytes memory initData;
+        serviceRevenue = fee / 2;
+
+        Clonable clone = Clonable(
+            shop.produce{value: fee}(clonableNoDev, initData, affiliate)
+        );
+
+        assertEq(clone.owner(), address(this));
+        assertEq(affiliate.balance, fee / 2);
+    }
+
+    function test_produceNoDevNoAffiliate() public {
+        bytes memory initData;
+        serviceRevenue = fee;
+
+        Clonable clone = Clonable(
+            shop.produce{value: fee}(clonableNoDev, initData, zeroAddress)
         );
 
         assertEq(clone.owner(), address(this));
