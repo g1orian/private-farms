@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import "openzeppelin-contracts/contracts/access/Ownable.sol";
 import "openzeppelin-contracts/contracts/proxy/Clones.sol";
-import "../interfaces/IClonable.sol";
+import "./interfaces/IClonable.sol";
 
 // @title Base Clonable Contract
 // @author G1orian

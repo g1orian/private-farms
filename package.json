@@ -9,8 +9,8 @@
   },
   "scripts": {
     "test": "forge test -vvv",
-    "cover": "forge coverage --contracts /src/main",
-    "coverage": "forge coverage --report lcov --contracts /src/main && perl %GENHTML% -o coverage lcov.info",
+    "cover": "forge coverage",
+    "coverage": "forge coverage --report lcov && perl %GENHTML% -o coverage lcov.info",
     "report": "start coverage/index.html"
   },
   "repository": {

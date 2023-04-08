@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import "../interfaces/IClonable.sol";
+import "./interfaces/IClonable.sol";
 import "openzeppelin-contracts/contracts/access/Ownable.sol";
 
 // @dev Cloning Shop Contract

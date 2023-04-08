@@ -2,8 +2,8 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
-import "../src/main/Shop.sol";
-import "../src/main/Clonable.sol";
+import "../src/Shop.sol";
+import "../src/Clonable.sol";
 
 // @dev Tests for Shop Contract
 contract ShopTest is Test {
