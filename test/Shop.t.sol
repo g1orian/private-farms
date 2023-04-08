@@ -10,13 +10,21 @@ contract ShopTest is Test {
     Shop public shop;
     Clonable public clonable;
     Clonable public clonableNoDev;
-    address payable public developer = payable(address(this));
+    address payable public developer = payable(makeAddr("developer"));
+    address payable public affiliate = payable(makeAddr("affiliate"));
+    address payable public zeroAddress = payable(address(0));
+    uint public fee = 100;
+    uint public shouldReceive;
+
+    fallback() external payable {
+        assertEq(shouldReceive, msg.value);
+    }
 
     function setUp() public {
-        shop = new Shop(100);
+        shop = new Shop(fee);
 
         clonable = new Clonable(developer);
-        clonableNoDev = new Clonable(payable(address(0)));
+        clonableNoDev = new Clonable(zeroAddress);
         clonable.transferOwnership(address(shop));
     }
 
@@ -39,6 +47,17 @@ contract ShopTest is Test {
     function testFail_returnOwnership() public {
         vm.prank(address(0));
         shop.returnOwnership(address(clonable));
+    }
+
+    function test_produce() public {
+        bytes memory initData;
+        shouldReceive = fee / 2;
+
+        Clonable clone = Clonable(
+            shop.produce{value: fee}(clonable, initData, zeroAddress)
+        );
+
+        assertEq(clone.owner(), address(this));
     }
 
 }

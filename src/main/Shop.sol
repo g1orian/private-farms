@@ -53,13 +53,14 @@ contract Shop is Ownable {
     }
 
     /**
-     * @dev Deploy new contract
+     * @dev Deploy new clone contract
      * @param clonable address of the contract to clone
      * @param initData data to init new contract
      */
     function produce(IClonable clonable, bytes memory initData, address payable affiliate)
     external payable returns (address clonedContract) {
         if (msg.value != fee) revert WrongValue();
+
         // transfer 50% to the the affiliate
         address payable userAffiliate = userAffiliates[msg.sender];
         // if affiliate is set for the user, override affiliate parameter, to use first set affiliate
@@ -69,11 +70,13 @@ contract Shop is Ownable {
             userAffiliates[msg.sender] = affiliate;
             affiliate.transfer(msg.value / 2);
         }
+
         // transfer 50% of the balance to the the contract developer
         address payable developer = clonable.developer();
         if (developer != address(0)) {
             developer.transfer(address(this).balance / 2);
         }
+
         // transfer the rest to the owner
         payable(owner()).transfer(address(this).balance);
 
