@@ -29,6 +29,16 @@ contract ClonableTest is Test {
         assertEq(clone.developer(), developer);
     }
 
+    event Cloned(address cloneContract, address indexed forClient);
+
+    function test_cloneEmit() public {
+        bytes memory initData;
+
+        vm.expectEmit(true, true, true, false, address(clonable));
+        emit Cloned(address(0), address(this));
+        clonable.clone(address(this), initData);
+    }
+
     function test_cloneZeroDev() public {
         bytes memory initData;
 

@@ -22,7 +22,7 @@ contract MockVault is PrivateVaultBase {
      * @dev Should return how much assets invested / staked
      *    - used to calculate total assets
      */
-    function investedAssets() public view override returns (uint) {
+    function investedAssets() public pure override returns (uint) {
         return 0;
     }
 

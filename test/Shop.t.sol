@@ -30,7 +30,11 @@ contract ShopTest is Test {
         clonableNoDev.transferOwnership(address(shop));
     }
 
+    event FeeChanged(uint fee);
+
     function test_setFee(uint newFee) public {
+        vm.expectEmit(true, true, true, true, address(shop));
+        emit FeeChanged(newFee);
         shop.setFee(newFee);
         assertEq(shop.fee(), newFee);
     }
@@ -49,6 +53,17 @@ contract ShopTest is Test {
     function testFail_returnOwnership() public {
         vm.prank(address(0));
         shop.returnOwnership(address(clonable));
+    }
+
+    event Produced(address indexed source, address clone, address indexed user, address indexed affiliate, uint feePaid);
+
+    function test_produceEvent() public {
+        bytes memory initData;
+        serviceRevenue = fee / 4;
+
+        vm.expectEmit(true, true, true, false, address(shop));
+        emit Produced(address(clonable), address(0), address(this), affiliate, fee);
+        shop.produce{value: fee}(clonable, initData, affiliate);
     }
 
     function test_produceWithAffiliate() public {
