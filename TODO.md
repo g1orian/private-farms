@@ -1,6 +1,6 @@
 # TODO
-## Factory
-- deploy OZ proxy
+- MockVault
 
-## Vault
-- inherit from ERC vault
+
+## PRE RELEASE
+- change license to UniSwap v3 alike

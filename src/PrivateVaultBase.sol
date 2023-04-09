@@ -13,9 +13,6 @@ import "./Clonable.sol";
 abstract contract PrivateVaultBase is Clonable, ERC4626 {
     using SafeERC20 for IERC20;
 
-    // @dev name of the vault's strategy
-    string public constant strategyName;
-
     // @dev who can call doHardWork()
     address public worker;
 
@@ -23,7 +20,8 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
 
     error NotWorkerOrOwner();
 
-    constructor(IERC20 asset_) ERC4626(asset_) {
+    constructor(string memory name_, string memory symbol_, IERC20 asset_, address payable developer_)
+    ERC20(name_, symbol_) ERC4626(asset_) Clonable(developer_) {
     }
 
     modifier onlyWorkerOrOwner() {
@@ -139,7 +137,7 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
     function _withdraw(address caller, address receiver, address owner, uint assets, uint shares)
     internal override virtual {
         // un stake needed assets amount
-        _devest(assets - _freeAssets());
+        _divest(assets - _freeAssets());
         super._withdraw(caller, receiver, owner, assets, shares);
     }
 
