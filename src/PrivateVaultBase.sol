@@ -14,7 +14,7 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
     using SafeERC20 for IERC20;
 
     // @dev name of the vault's strategy
-    string public strategyName;
+    string public constant strategyName;
 
     // @dev who can call doHardWork()
     address public worker;
@@ -171,7 +171,7 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
      *    - if available amount less then requested, then do not revert and withdraw all available
      * @param assets amount of assets to de-vest
      */
-    function _devest(uint assets) internal virtual;
+    function _divest(uint assets) internal virtual;
 
     /**
      * @dev Should claim all rewards
@@ -199,8 +199,5 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
         }
 
     }
-
-
-
 
 }
