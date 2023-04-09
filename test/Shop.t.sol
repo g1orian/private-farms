@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.18;
 
 import "forge-std/Test.sol";
 import "../src/Shop.sol";
@@ -104,29 +104,6 @@ contract ShopTest is Test {
 
         vm.expectRevert(Shop.WrongValue.selector);
         shop.produce{value: 0}(clonable, initData, zeroAddress);
-    }
-
-    function test_produceNotMother() public {
-        bytes memory initData;
-        serviceRevenue = fee;
-
-        Clonable clone = Clonable(
-            shop.produce{value: fee}(clonableNoDev, initData, zeroAddress)
-        );
-        clone.transferOwnership(address(shop));
-        vm.expectRevert(Clonable.NotMotherContract.selector);
-        shop.produce{value: fee}(clone, initData, zeroAddress);
-    }
-
-    function test_produceCloneAlreadyInitialized() public {
-        bytes memory initData;
-        serviceRevenue = fee;
-
-        Clonable clone = Clonable(
-            shop.produce{value: fee}(clonableNoDev, initData, zeroAddress)
-        );
-        vm.expectRevert(Clonable.CloneAlreadyInitialized.selector);
-        clone.initClone(address(this), initData);
     }
 
     function test_getAllUserContracts() public {

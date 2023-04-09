@@ -9,7 +9,7 @@ import "./interfaces/IClonable.sol";
 // @author G1orian
 contract Clonable is IClonable, Ownable {
 
-    /// @dev true if this is mother contract
+    /// @dev true if this is mother (not cloned) contract
     bool private motherContract; // it will be false at cloned contracts
     /// @dev address of the contract developer (to share revenue)
     address payable public immutable override developer;
@@ -36,8 +36,9 @@ contract Clonable is IClonable, Ownable {
      */
     function clone(address cloneOwner, bytes memory initData)
     onlyOwner external override returns (address newClone) {
-        if (!motherContract)
+        if (!motherContract) {
             revert NotMotherContract();
+        }
         newClone = Clones.clone(address(this));
         IClonable(newClone).initClone(cloneOwner, initData);
         emit Cloned(newClone, cloneOwner);
@@ -50,8 +51,9 @@ contract Clonable is IClonable, Ownable {
      */
     function initClone(address cloneOwner, bytes memory initData)
     external override virtual {
-        if (owner() != address(0))
+        if (owner() != address(0)) {
             revert CloneAlreadyInitialized();
+        }
         _transferOwnership(cloneOwner);
         _initCloneWithData(initData);
     }
@@ -62,7 +64,9 @@ contract Clonable is IClonable, Ownable {
      */
     function _initCloneWithData(bytes memory initData)
     internal virtual {
-        if (initData.length != 0) revert WrongInitData();
+        if (initData.length != 0) {
+            revert WrongInitData();
+        }
     }
 
 }

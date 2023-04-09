@@ -59,7 +59,9 @@ contract Shop is Ownable {
      */
     function produce(IClonable clonable, bytes memory initData, address payable affiliate)
     external payable returns (address clonedContract) {
-        if (msg.value != fee) revert WrongValue();
+        if (msg.value != fee) {
+            revert WrongValue();
+        }
 
         // transfer 50% to the the affiliate
         address payable userAffiliate = userAffiliates[msg.sender];
