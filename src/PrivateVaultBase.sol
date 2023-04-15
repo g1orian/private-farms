@@ -34,6 +34,7 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
     error NoWork();
     error Loss();
 
+    // @notice All arguments are used to initialize the contract must be immutable to support cloning (proxy pattern)
     constructor(string memory name_, string memory symbol_, IERC20 asset_, address payable developer_)
     ERC20(name_, symbol_)
     ERC4626(asset_)
@@ -46,12 +47,6 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
         _;
     }
 
-    function _setWorker(address worker_)
-    internal {
-        worker = worker_;
-        emit WorkerChanged(worker_);
-    }
-
     function _initCloneWithData(bytes memory initData)
     internal override virtual {
         // skip initialization if no data provided, as worker can be set later
@@ -59,6 +54,12 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
             return;
         address worker_ = abi.decode(initData, (address));
         _setWorker(worker_);
+    }
+
+    function _setWorker(address worker_)
+    internal {
+        worker = worker_;
+        emit WorkerChanged(worker_);
     }
 
     // ******** ONLY OWNER *********
@@ -123,6 +124,15 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
         IERC721(token).safeTransferFrom(address(this), msg.sender, tokenId);
     }
 
+    // ******** RECEIVE *********
+
+    receive() external payable {}
+
+    function onERC721Received(address /*operator*/, address /*from*/, uint256 /*tokenId*/, bytes memory /*data*/)
+    external virtual pure returns (bytes4) {
+        return IERC721Receiver.onERC721Received.selector;
+    }
+
     // ******** DEPOSIT / WITHDRAW ********
 
     function _freeAssets()
@@ -166,11 +176,10 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
         return IERC20(asset()).balanceOf(address(this)) + investedAssets();
     }
 
-    // ******** ONLY WORKER OR OWNER *********
+    // ******** HARD WORK *********
 
     function doHardWork()
     onlyWorkerOrOwner external {
-        IERC20 _asset = IERC20(asset());
         uint totalBefore = totalAssets();
 
         _doHardWork();
@@ -186,6 +195,26 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
         lastHardWork = block.timestamp;
 
         emit HardWork(profit, totalAfter);
+    }
+
+    /**
+     * @dev Calculates APR based on last profit and time since prev to last hard work
+     * @return APR with 18 decimals
+     */
+    function APR() public view returns (uint) {
+        uint _prevHardWork = prevHardWork;
+        uint _lastHardWork = lastHardWork;
+        uint _lastProfit = lastProfit;
+
+        if (_prevHardWork == 0 || _lastHardWork == 0 || _lastProfit == 0) return 0;
+
+        uint time = _lastHardWork - _prevHardWork;
+        uint yearlyProfit = _lastProfit * 365 days / time;
+        return yearlyProfit * 10**18 / totalAssets();
+    }
+
+    function APY() public view returns (uint) {
+        // TODO https://www.investopedia.com/terms/a/apy.asp
     }
 
     // *******************************
@@ -236,13 +265,5 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
      */
     function _claimRewardsAndConvertToAsset() internal virtual;
 
-
-
-    receive() external payable {}
-
-    function onERC721Received(address /*operator*/, address /*from*/, uint256 /*tokenId*/, bytes memory /*data*/)
-    external pure returns (bytes4) {
-        return IERC721Receiver.onERC721Received.selector;
-    }
 
 }

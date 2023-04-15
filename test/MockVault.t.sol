@@ -88,6 +88,24 @@ contract MockVaultTest is Test {
 
     // deposit / withdrawal
 
+    // @notice investedAssets() is always 0 in MockVault
+    function test_investedAssets() public {
+        assertEq(vault.investedAssets(), 0);
+    }
+
+    function test_APR() public {
+        assertEq(vault.APR(), 0);
+
+        vault.deposit(10, address(this));
+        // 10% = 0,1 18 decimals
+        vault.setLast(1, block.timestamp + 365 days, block.timestamp);
+        assertEq(vault.APR(), 10**18 / 10);
+        // 365% = 3,65 18 decimals
+        vault.setLast(1, block.timestamp + 1 days, block.timestamp);
+        assertEq(vault.APR(), 10**18 / 10 * 365);
+
+    }
+
     function test_deposit_NotOwner() public {
         vm.prank(zeroAddress);
         vm.expectRevert('Ownable: caller is not the owner');
