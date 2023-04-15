@@ -5,8 +5,8 @@ import "forge-std/Test.sol";
 import "../src/mocks/MockVault.sol";
 import "../src/mocks/MockERC20.sol";
 import "../src/mocks/MockERC721.sol";
+import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-contracts/contracts/token/ERC721/IERC721Receiver.sol";
-
 
 // @dev Tests for MockVault (PrivateVaultBase) Contract
 contract MockVaultTest is Test {
@@ -197,8 +197,8 @@ contract MockVaultTest is Test {
         assertEq(balanceBefore + amount, balanceAfter);
     }
 
-    function onERC721Received(address operator, address from, uint256 tokenId, bytes memory data)
-    external returns (bytes4) {
+    function onERC721Received(address /*operator*/, address /*from*/, uint256 /*tokenId*/, bytes memory /*data*/)
+    external pure returns (bytes4) {
         return IERC721Receiver.onERC721Received.selector;
     }
 

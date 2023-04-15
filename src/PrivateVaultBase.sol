@@ -210,8 +210,8 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
 
     receive() external payable {}
 
-    function onERC721Received(address operator, address from, uint256 tokenId, bytes memory data)
-    external returns (bytes4) {
+    function onERC721Received(address /*operator*/, address /*from*/, uint256 /*tokenId*/, bytes memory /*data*/)
+    external pure returns (bytes4) {
         return IERC721Receiver.onERC721Received.selector;
     }
 
