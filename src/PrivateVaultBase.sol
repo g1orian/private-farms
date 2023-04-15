@@ -9,7 +9,7 @@ import "openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
 import "./Clonable.sol";
 
 // @title Base Private Vault Contract
-// @author G1orian
+// @author Bogdoslav
 abstract contract PrivateVaultBase is Clonable, ERC4626 {
     using SafeERC20 for IERC20;
 

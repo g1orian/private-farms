@@ -14,11 +14,25 @@ contract MockVaultTest is Test {
 
     address payable public developer = payable(makeAddr("developer"));
     address payable public zeroAddress = payable(address(0));
+    address public worker = makeAddr("worker");
+
+    event WorkerChanged(address worker);
 
     function setUp() public {
         vault = new MockVault(name, symbol, asset, developer);
+        vault.setWorker(worker);
+
     }
 
-    // TODO test functions
+    function test_setWorker() public {
+        assertEq(vault.worker(), worker);
+
+        address newWorker = makeAddr("newWorker");
+
+        vm.expectEmit(true, true, true, true, address(vault));
+        emit WorkerChanged(newWorker);
+        vault.setWorker(newWorker);
+        assertEq(vault.worker(), newWorker);
+    }
 
 }

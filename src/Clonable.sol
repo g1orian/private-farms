@@ -6,7 +6,7 @@ import "openzeppelin-contracts/contracts/proxy/Clones.sol";
 import "./interfaces/IClonable.sol";
 
 // @title Base Clonable Contract
-// @author G1orian
+// @author Bogdoslav
 contract Clonable is IClonable, Ownable {
 
     /// @dev true if this is mother (not cloned) contract

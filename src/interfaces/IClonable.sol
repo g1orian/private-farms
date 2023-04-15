@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-// @author G1orian
+// @author Bogdoslav
 interface IClonable {
     /**
      * @dev address of the contract developer (to share revenue)

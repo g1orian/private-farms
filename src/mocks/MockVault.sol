@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 import "../PrivateVaultBase.sol";
 
 // @title Mock Private Vault Contract
-// @author G1orian
+// @author Bogdoslav
 contract MockVault is PrivateVaultBase {
 
     /**

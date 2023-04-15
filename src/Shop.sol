@@ -5,7 +5,7 @@ import "./interfaces/IClonable.sol";
 import "openzeppelin-contracts/contracts/access/Ownable.sol";
 
 // @dev Cloning Shop Contract
-// @author G1orian
+// @author Bogdoslav
 contract Shop is Ownable {
     // @dev fee for cloning
     uint public fee;
