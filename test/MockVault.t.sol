@@ -21,18 +21,41 @@ contract MockVaultTest is Test {
     function setUp() public {
         vault = new MockVault(name, symbol, asset, developer);
         vault.setWorker(worker);
+    }
 
+    function test_worker() public {
+        assertEq(vault.worker(), worker);
     }
 
     function test_setWorker() public {
-        assertEq(vault.worker(), worker);
-
         address newWorker = makeAddr("newWorker");
 
         vm.expectEmit(true, true, true, true, address(vault));
         emit WorkerChanged(newWorker);
         vault.setWorker(newWorker);
         assertEq(vault.worker(), newWorker);
+    }
+
+    function testFail_setWorker() public {
+        vm.prank(address(0));
+        vault.setWorker(developer);
+    }
+
+    function test_doHardWork_NotWorkerOrOwner() public {
+        vm.prank(zeroAddress);
+        vm.expectRevert(PrivateVaultBase.NotWorkerOrOwner.selector);
+        vault.doHardWork();
+    }
+
+    function test_doHardWork_NoWork_owner() public {
+        vm.expectRevert(PrivateVaultBase.NoWork.selector);
+        vault.doHardWork();
+    }
+
+    function test_doHardWork_NoWork_worker() public {
+        vault.setWorker(worker);
+        vm.expectRevert(PrivateVaultBase.NoWork.selector);
+        vault.doHardWork();
     }
 
 }

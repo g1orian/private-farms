@@ -46,16 +46,9 @@ contract MockVault is PrivateVaultBase {
     /**
      * @dev Should claim all rewards
      */
-    function _claimRewards() internal override {
+    function _claimRewardsAndConvertToAsset() internal override {
         // just do nothing
     }
 
-    /**
-     * @dev Should convert rewards to asset
-     *    - check and skip conversion when no rewards
-     */
-    function _convertRewardsToAsset() internal override {
-        // just do nothing
-    }
 
 }

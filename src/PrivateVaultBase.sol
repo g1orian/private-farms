@@ -19,13 +19,15 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
     event WorkerChanged(address worker);
 
     error NotWorkerOrOwner();
+    // @dev
+    error NoWork();
 
     constructor(string memory name_, string memory symbol_, IERC20 asset_, address payable developer_)
     ERC20(name_, symbol_) ERC4626(asset_) Clonable(developer_) {
     }
 
     modifier onlyWorkerOrOwner() {
-        if (worker != msg.sender || owner() != msg.sender) revert NotWorkerOrOwner();
+        if (worker != msg.sender && owner() != msg.sender) revert NotWorkerOrOwner();
         _;
     }
 
@@ -173,27 +175,25 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
 
     /**
      * @dev Should claim all rewards
-     */
-    function _claimRewards() internal virtual;
-
-    /**
-     * @dev Should convert rewards to asset
+     * @notice Should convert rewards to asset
      *    - check and skip conversion when no rewards
      */
-    function _convertRewardsToAsset() internal virtual;
+    function _claimRewardsAndConvertToAsset() internal virtual;
 
     /**
      * @dev Do Hard Work common workflow
+     * @notice Must revert with NoWork() when there is no work to do to avoid transaction cost (as Gelato simulates tx before actual run)
      */
     function _doHardWork() internal virtual {
         // claim rewards (if any)
-        _claimRewards();
-        // convert rewards to asset
-        _convertRewardsToAsset();
+        _claimRewardsAndConvertToAsset();
         // invest free assets
         uint freeAssets = _freeAssets();
         if (freeAssets > 0) {
             _invest(_freeAssets());
+        } else {
+            // revert to avoid transaction cost
+            revert NoWork();
         }
 
     }
