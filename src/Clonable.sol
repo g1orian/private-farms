@@ -54,8 +54,8 @@ contract Clonable is IClonable, Ownable {
         if (owner() != address(0)) {
             revert CloneAlreadyInitialized();
         }
-        _transferOwnership(cloneOwner);
         _initCloneWithData(initData);
+        _transferOwnership(cloneOwner);
     }
 
     /**

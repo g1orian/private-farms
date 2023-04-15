@@ -31,18 +31,26 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
         _;
     }
 
+    function _setWorker(address worker_)
+    internal {
+        worker = worker_;
+        emit WorkerChanged(worker_);
+    }
+
     function _initCloneWithData(bytes memory initData)
     internal override virtual {
+        // skip initialization if no data provided, as worker can be set later
+        if (initData.length == 0)
+            return;
         address worker_ = abi.decode(initData, (address));
-        setWorker(worker_);
+        _setWorker(worker_);
     }
 
     // ******** ONLY OWNER *********
 
     function setWorker(address worker_)
     onlyOwner public {
-        worker = worker_;
-        emit WorkerChanged(worker_);
+        _setWorker(worker_);
     }
 
     function deposit(uint assets, address receiver)

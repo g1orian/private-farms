@@ -23,6 +23,20 @@ contract MockVaultTest is Test {
         vault.setWorker(worker);
     }
 
+    function test_initCloneNoData() public {
+        MockVault clone = MockVault(
+            vault.clone(address(this), '')
+        );
+        assertEq(clone.worker(), address(0));
+    }
+
+    function test_initCloneWithData() public {
+        MockVault clone = MockVault(
+            vault.clone(address(this), abi.encode(worker))
+        );
+        assertEq(clone.worker(), worker);
+    }
+
     function test_worker() public {
         assertEq(vault.worker(), worker);
     }
