@@ -18,14 +18,27 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
     // @dev who can call doHardWork()
     address public worker;
 
+    // @dev last time doHardWork() was called. Used to calc APR and APY
+    uint lastHardWork;
+
+    // @dev previous (before last) time doHardWork() was called. Used to calc APR and APY
+    uint prevHardWork;
+
+    // @dev last profit (in asset) from doHardWork()
+    uint lastProfit;
+
     event WorkerChanged(address worker);
+    event HardWork(uint profit, uint totalAssetsAfter);
 
     error NotWorkerOrOwner();
-    // @dev
     error NoWork();
+    error Loss();
 
     constructor(string memory name_, string memory symbol_, IERC20 asset_, address payable developer_)
-    ERC20(name_, symbol_) ERC4626(asset_) Clonable(developer_) {
+    ERC20(name_, symbol_)
+    ERC4626(asset_)
+    Clonable(developer_)
+    {
     }
 
     modifier onlyWorkerOrOwner() {
@@ -73,13 +86,6 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
     function redeem(uint shares, address receiver, address owner)
     onlyOwner public override returns (uint assets) {
         return super.redeem(shares, receiver, owner);
-    }
-
-    // ******** ONLY WORKER OR OWNER *********
-
-    function doHardWork()
-    onlyWorkerOrOwner external {
-        _doHardWork();
     }
 
     // ******** SALVAGE *********
@@ -160,9 +166,49 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
         return IERC20(asset()).balanceOf(address(this)) + investedAssets();
     }
 
+    // ******** ONLY WORKER OR OWNER *********
+
+    function doHardWork()
+    onlyWorkerOrOwner external {
+        IERC20 _asset = IERC20(asset());
+        uint totalBefore = totalAssets();
+
+        _doHardWork();
+
+        uint totalAfter = totalAssets();
+        // Revert on loss to prevent loss of funds
+        if (totalAfter < totalBefore) revert Loss();
+
+        uint profit = totalAfter - totalBefore;
+
+        lastProfit = profit;
+        prevHardWork = lastHardWork;
+        lastHardWork = block.timestamp;
+
+        emit HardWork(profit, totalAfter);
+    }
+
     // *******************************
     // ******** TO IMPLEMENT *********
     // *******************************
+
+    /**
+     * @dev Do Hard Work common workflow
+     * @notice Must revert with NoWork() when there is no work to do to avoid transaction cost (as Gelato simulates tx before actual run)
+     */
+    function _doHardWork() internal virtual {
+        // claim rewards (if any)
+        _claimRewardsAndConvertToAsset();
+        // invest free assets
+        uint freeAssets = _freeAssets();
+        if (freeAssets > 0) {
+            _invest(_freeAssets());
+        } else {
+            // revert to avoid transaction cost
+            revert NoWork();
+        }
+
+    }
 
     /**
      * @dev Should return how much assets invested / staked
@@ -190,23 +236,7 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
      */
     function _claimRewardsAndConvertToAsset() internal virtual;
 
-    /**
-     * @dev Do Hard Work common workflow
-     * @notice Must revert with NoWork() when there is no work to do to avoid transaction cost (as Gelato simulates tx before actual run)
-     */
-    function _doHardWork() internal virtual {
-        // claim rewards (if any)
-        _claimRewardsAndConvertToAsset();
-        // invest free assets
-        uint freeAssets = _freeAssets();
-        if (freeAssets > 0) {
-            _invest(_freeAssets());
-        } else {
-            // revert to avoid transaction cost
-            revert NoWork();
-        }
 
-    }
 
     receive() external payable {}
 
