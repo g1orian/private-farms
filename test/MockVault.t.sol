@@ -100,10 +100,33 @@ contract MockVaultTest is Test {
         vault.withdraw(1, address(this), address(this));
     }
 
+    function test_mint_NotOwner() public {
+        vm.prank(zeroAddress);
+        vm.expectRevert('Ownable: caller is not the owner');
+        vault.mint(1, address(this));
+    }
+
+    function test_redeem_NotOwner() public {
+        vm.prank(zeroAddress);
+        vm.expectRevert('Ownable: caller is not the owner');
+        vault.redeem(1, address(this), address(this));
+    }
+
     function test_deposit(uint amount) public {
         uint assetsBefore = asset.balanceOf(address(this));
 
         vault.deposit(amount, address(this));
+        assertEq(vault.totalAssets(), amount);
+
+        uint assetsAfter = asset.balanceOf(address(this));
+        assertEq(assetsBefore - amount, assetsAfter);
+
+    }
+
+    function test_mint(uint amount) public {
+        uint assetsBefore = asset.balanceOf(address(this));
+
+        vault.mint(amount, address(this));
         assertEq(vault.totalAssets(), amount);
 
         uint assetsAfter = asset.balanceOf(address(this));
@@ -121,7 +144,19 @@ contract MockVaultTest is Test {
 
         uint assetsAfter = asset.balanceOf(address(this));
         assertEq(assetsBefore, assetsAfter);
+    }
 
+    function test_redeem(uint amount) public {
+        uint assetsBefore = asset.balanceOf(address(this));
+
+        vault.deposit(amount, address(this));
+        assertEq(vault.totalAssets(), amount);
+        uint shares = IERC20(vault).balanceOf(address(this));
+        vault.redeem(shares, address(this), address(this));
+        assertEq(vault.totalAssets(), 0);
+
+        uint assetsAfter = asset.balanceOf(address(this));
+        assertEq(assetsBefore, assetsAfter);
     }
 
     // salvages
