@@ -6,6 +6,8 @@ import "openzeppelin-contracts/contracts/access/Ownable.sol";
 import "openzeppelin-contracts/contracts/proxy/Clones.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 import "openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
+import "openzeppelin-contracts/contracts/token/ERC721/IERC721Receiver.sol";
+
 import "./Clonable.sol";
 
 // @title Base Private Vault Contract
@@ -112,7 +114,7 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
      */
     function salvageERC721(address token, uint tokenId)
     onlyOwner external {
-        IERC721(token).transferFrom(address(this), msg.sender, tokenId);
+        IERC721(token).safeTransferFrom(address(this), msg.sender, tokenId);
     }
 
     // ******** DEPOSIT / WITHDRAW ********
@@ -204,6 +206,13 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
             revert NoWork();
         }
 
+    }
+
+    receive() external payable {}
+
+    function onERC721Received(address operator, address from, uint256 tokenId, bytes memory data)
+    external returns (bytes4) {
+        return IERC721Receiver.onERC721Received.selector;
     }
 
 }
