@@ -29,20 +29,22 @@ contract VaultShop is Shop {
         uint len = vaults.length;
         info = new VaultInfo[](len);
         for (uint i = 0; i < len; i++) {
-            address vault = vaults[i];
-            info[i].vault = vault;
-            info[i].name = IPrivateVault(vault).name();
-            info[i].symbol = IPrivateVault(vault).symbol();
+            IPrivateVault vault = IPrivateVault(vaults[i]);
+            info[i].vault = address(vault);
+            info[i].name = vault.name();
+            info[i].symbol = vault.symbol();
+            info[i].TVL = vault.totalAssets();
+            info[i].APR = vault.APR();
 
-            info[i].TVL = IPrivateVault(vault).totalAssets();
-            info[i].APR = IPrivateVault(vault).APR();
-            address asset = IPrivateVault(vault).asset();
+            address asset = vault.asset();
             info[i].asset = asset;
+
             try IERC20Metadata(asset).symbol() returns (string memory symbol) {
                 info[i].assetSymbol = symbol;
             } catch {
                 info[i].assetSymbol = "";
             }
+
             try IERC20Metadata(asset).name() returns (string memory name) {
                 info[i].assetName = name;
             } catch {
