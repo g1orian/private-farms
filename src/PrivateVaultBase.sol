@@ -9,11 +9,17 @@ import "openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
 import "openzeppelin-contracts/contracts/token/ERC721/IERC721Receiver.sol";
 
 import "./Clonable.sol";
+import "openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 // @title Base Private Vault Contract
 // @author Bogdoslav
 abstract contract PrivateVaultBase is Clonable, ERC4626 {
     using SafeERC20 for IERC20;
+
+    // @dev name and symbol are moved from ERC20 here to support cloning (proxy pattern)
+    // @notice as they are not immutable in ERC20, they are not supported by Clones
+    string private _name;
+    string private _symbol;
 
     // @dev who can call doHardWork()
     address public worker;
@@ -40,6 +46,23 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
     ERC4626(asset_)
     Clonable(developer_)
     {
+        _name = name_;
+        _symbol = symbol_;
+    }
+
+    /**
+     * @dev Returns the name of the token.
+     */
+    function name() public view virtual override (ERC20, IERC20Metadata) returns (string memory) {
+        return _name;
+    }
+
+    /**
+     * @dev Returns the symbol of the token, usually a shorter version of the
+     * name.
+     */
+    function symbol() public view virtual override (ERC20, IERC20Metadata) returns (string memory) {
+        return _symbol;
     }
 
     modifier onlyWorkerOrOwner() {
@@ -47,8 +70,11 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
         _;
     }
 
-    function _initCloneWithData(bytes memory initData)
+    function _initCloneWithData(address mother, bytes memory initData)
     internal override virtual {
+        // copy name and symbol from mother as they are not immutable in ERC20
+        _name = PrivateVaultBase(payable(mother)).name();
+        _symbol = PrivateVaultBase(payable(mother)).symbol();
         // skip initialization if no data provided, as worker can be set later
         if (initData.length == 0)
             return;
@@ -208,13 +234,9 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
 
         if (_prevHardWork == 0 || _lastHardWork == 0 || _lastProfit == 0) return 0;
 
-        uint time = _lastHardWork - _prevHardWork;
-        uint yearlyProfit = _lastProfit * 365 days / time;
+        uint period = _lastHardWork - _prevHardWork;
+        uint yearlyProfit = _lastProfit * 365 days / period;
         return yearlyProfit * 10**18 / totalAssets();
-    }
-
-    function APY() public view returns (uint) {
-        // TODO https://www.investopedia.com/terms/a/apy.asp
     }
 
     // *******************************

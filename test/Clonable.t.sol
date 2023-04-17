@@ -62,7 +62,7 @@ contract ClonableTest is Test {
         Clonable clone = Clonable(
             clonable.clone(address(this), initData));
         vm.expectRevert(Clonable.CloneAlreadyInitialized.selector);
-        clone.initClone(address(this), initData);
+        clone.initClone(address(this), address(clonable), initData);
     }
 
     function test_cloneWrongInitData() public {

@@ -20,5 +20,5 @@ interface IClonable {
      * @param client address of the new contract owner
      * @param initData data to init new contract
      */
-    function initClone(address client, bytes memory initData) external;
+    function initClone(address client, address mother, bytes memory initData) external;
 }

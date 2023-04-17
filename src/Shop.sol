@@ -3,6 +3,7 @@ pragma solidity ^0.8.13;
 
 import "./interfaces/IClonable.sol";
 import "openzeppelin-contracts/contracts/access/Ownable.sol";
+import "openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 // @dev Cloning Shop Contract
 // @author Bogdoslav
@@ -45,14 +46,6 @@ contract Shop is Ownable {
     }
 
     /**
-     * @dev Get all contracts deployed by the user
-     */
-    function getAllUserContracts(address user)
-    external view returns (address[] memory) {
-        return userContracts[user];
-    }
-
-    /**
      * @dev Deploy new clone contract
      * @param clonable address of the contract to clone
      * @param initData data to init new contract
@@ -88,4 +81,16 @@ contract Shop is Ownable {
         userContracts[user].push(clonedContract);
         emit Produced(address(clonable), clonedContract, user, affiliate, msg.value);
     }
+
+    // ******** UI HELPER FUNCTIONS  ********
+
+
+    /**
+     * @dev Get all contracts deployed by the user
+     */
+    function getAllUserContracts(address user)
+    public view returns (address[] memory) {
+        return userContracts[user];
+    }
+
 }
