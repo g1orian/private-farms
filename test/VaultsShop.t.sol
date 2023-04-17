@@ -66,5 +66,31 @@ contract ShopTest is Test {
         assertEq(v.APR, 0);
     }
 
+    function test_getVaultsInfo() public {
+        bytes memory initData;
+        assertEq(shop.getAllUserVaultsInfo(address(this)).length, 0);
+
+        address clone = shop.produce{value: 0}(vault, initData, zeroAddress);
+        MockVault cloneVault = MockVault(payable(clone));
+        uint deposit = 1000;
+        asset.approve(address(cloneVault), deposit);
+        cloneVault.deposit(deposit, address(this));
+
+        address[] memory vaultAddresses = shop.getAllUserContracts(address(this));
+        VaultShop.VaultInfo[] memory vaults = shop.getVaultsInfo(vaultAddresses);
+        assertEq(vaults.length, 1);
+        VaultShop.VaultInfo memory v = vaults[0];
+
+        assertEq(v.vault, address(clone));
+        assertEq(v.name, 'MockVault');
+        assertEq(v.symbol, 'MV');
+        assertEq(v.asset, address(asset));
+        assertEq(v.assetSymbol, 'MA');
+        assertEq(v.assetName, 'MockAsset');
+        assertEq(v.TVL, deposit);
+        assertEq(v.APR, 0);
+
+    }
+
 
 }

@@ -53,9 +53,7 @@ contract VaultShop is Shop {
 
     function getAllUserVaultsInfo(address user)
     external view returns (VaultInfo[] memory) {
-        return getVaultsInfo(
-            getAllUserContracts(user)
-        );
+        return getVaultsInfo(getAllUserContracts(user));
     }
 
 
