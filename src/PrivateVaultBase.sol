@@ -25,13 +25,13 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
     address public worker;
 
     // @dev last time doHardWork() was called. Used to calc APR and APY
-    uint lastHardWork;
+    uint public lastHardWork;
 
     // @dev previous (before last) time doHardWork() was called. Used to calc APR and APY
-    uint prevHardWork;
+    uint public prevHardWork;
 
-    // @dev last profit (in asset) from doHardWork()
-    uint lastProfit;
+    // @dev last profit (in asset) from doHardWork(). Used to calc APR and APY
+    uint public lastProfit;
 
     event WorkerChanged(address worker);
     event HardWork(uint profit, uint totalAssetsAfter);

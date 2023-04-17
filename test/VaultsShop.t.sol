@@ -37,6 +37,10 @@ contract ShopTest is Test {
         uint deposit = 1000;
         asset.approve(address(cloneVault), deposit);
         cloneVault.deposit(deposit, address(this));
+        uint lastProfit = 555;
+        uint prevHardWork = 333;
+        uint lastHardWork = 777;
+        cloneVault.setLast(lastProfit, lastHardWork, prevHardWork);
 
         VaultShop.VaultInfo[] memory vaults = shop.getAllUserVaultsInfo(address(this));
         assertEq(vaults.length, 1);
@@ -49,7 +53,9 @@ contract ShopTest is Test {
         assertEq(v.assetSymbol, 'MA');
         assertEq(v.assetName, 'MockAsset');
         assertEq(v.TVL, deposit);
-        assertEq(v.APR, 0);
+        assertEq(v.lastProfit, lastProfit);
+        assertEq(v.prevHardWork, prevHardWork);
+        assertEq(v.lastHardWork, lastHardWork);
 
         clone = shop.produce{value: 0}(vault, initData, zeroAddress);
         vaults = shop.getAllUserVaultsInfo(address(this));

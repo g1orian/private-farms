@@ -6,11 +6,14 @@ pragma solidity ^0.8.13;
 // @author Bogdoslav
 interface IPrivateVault {
 
+    // @dev who can call doHardWork()
+    function worker() external view returns (address);
     function asset() external view returns (address);
     function name() external view returns (string memory);
     function symbol() external view returns (string memory);
-    // @dev who can call doHardWork()
-    function worker() external returns (address);
+    function prevHardWork() external view returns (uint);
+    function lastHardWork() external view returns (uint);
+    function lastProfit() external view returns (uint);
 
     event WorkerChanged(address worker);
     error NotWorkerOrOwner();
