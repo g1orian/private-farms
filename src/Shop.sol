@@ -85,4 +85,9 @@ contract Shop is Ownable {
         return userContracts[user];
     }
 
+    /**
+     * @dev Gap for new variables to be added
+     */
+    uint256[49] private __gap;
+
 }

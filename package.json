@@ -11,7 +11,8 @@
     "test": "forge test -vvv",
     "cover": "forge coverage",
     "coverage": "forge coverage --report lcov && perl %GENHTML% -o coverage lcov.info",
-    "report": "start coverage/index.html"
+    "report": "start coverage/index.html",
+    "abis": "forge inspect VaultShop abi > abis/VaultShop.abi.json && forge inspect IPrivateVault abi > abis/IPrivateVault.abi.json"
   },
   "repository": {
     "type": "git",
