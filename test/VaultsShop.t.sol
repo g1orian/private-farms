@@ -20,7 +20,7 @@ contract ShopTest is Test {
     }
 
     function setUp() public {
-        shop = new VaultShop(0);
+        shop = new VaultShop();
 
         vault = new MockVault('MockVault', 'MV', asset, developer);
         vault.transferOwnership(address(shop));

@@ -21,14 +21,6 @@ contract Shop is Ownable {
     error WrongValue();
 
     /**
-     * @dev Constructor
-     * @param fee_ fee for cloning
-     */
-    constructor(uint fee_) Ownable() {
-        setFee(fee_);
-    }
-
-    /**
      * @dev Set fee for cloning
      */
     function setFee(uint fee_)

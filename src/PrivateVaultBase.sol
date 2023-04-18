@@ -202,6 +202,22 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
         return IERC20(asset()).balanceOf(address(this)) + investedAssets();
     }
 
+    /**
+     * @dev Calculates APR based on last profit and time since prev to last hard work
+     * @return APR with 18 decimals
+     */
+    function APR() public view returns (uint) {
+        uint _prevHardWork = prevHardWork;
+        uint _lastHardWork = lastHardWork;
+        uint _lastProfit = lastProfit;
+
+        if (_prevHardWork == 0 || _lastHardWork == 0 || _lastProfit == 0) return 0;
+
+        uint period = _lastHardWork - _prevHardWork;
+        uint yearlyProfit = _lastProfit * 365 days / period;
+        return yearlyProfit * 10**18 / totalAssets();
+    }
+
     // ******** HARD WORK *********
 
     function doHardWork()
@@ -221,22 +237,6 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
         lastHardWork = block.timestamp;
 
         emit HardWork(profit, totalAfter);
-    }
-
-    /**
-     * @dev Calculates APR based on last profit and time since prev to last hard work
-     * @return APR with 18 decimals
-     */
-    function APR() public view returns (uint) {
-        uint _prevHardWork = prevHardWork;
-        uint _lastHardWork = lastHardWork;
-        uint _lastProfit = lastProfit;
-
-        if (_prevHardWork == 0 || _lastHardWork == 0 || _lastProfit == 0) return 0;
-
-        uint period = _lastHardWork - _prevHardWork;
-        uint yearlyProfit = _lastProfit * 365 days / period;
-        return yearlyProfit * 10**18 / totalAssets();
     }
 
     // *******************************

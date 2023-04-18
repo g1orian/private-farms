@@ -21,7 +21,8 @@ contract ShopTest is Test {
     }
 
     function setUp() public {
-        shop = new Shop(fee);
+        shop = new Shop();
+        shop.setFee(fee);
 
         clonable = new Clonable(developer);
         clonable.transferOwnership(address(shop));

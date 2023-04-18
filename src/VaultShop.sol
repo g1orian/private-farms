@@ -9,8 +9,6 @@ import "openzeppelin-contracts/contracts/access/Ownable.sol";
 // @author Bogdoslav
 contract VaultShop is Shop {
 
-    constructor(uint fee_) Shop(fee_) {}
-
     // ******** UI HELPER FUNCTIONS  ********
 
     struct VaultInfo {
