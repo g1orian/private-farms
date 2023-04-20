@@ -13,6 +13,7 @@ contract VaultShop is Shop {
 
     struct VaultInfo {
         address vault;
+        address owner;
         string name;
         string symbol;
         address asset;
@@ -32,6 +33,7 @@ contract VaultShop is Shop {
         for (uint i = 0; i < len; i++) {
             IPrivateVault vault = IPrivateVault(vaults[i]);
             info[i].vault = address(vault);
+            info[i].owner = vault.owner();
             info[i].name = vault.name();
             info[i].symbol = vault.symbol();
             info[i].TVL = vault.totalAssets();

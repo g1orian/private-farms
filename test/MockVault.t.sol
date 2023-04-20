@@ -67,17 +67,17 @@ contract MockVaultTest is Test {
 
     function test_doHardWork_NotWorkerOrOwner() public {
         vm.prank(zeroAddress);
-        vm.expectRevert(PrivateVaultBase.NotWorkerOrOwner.selector);
+        vm.expectRevert('Not worker or owner');
         vault.doHardWork();
     }
 
     function test_doHardWork_NoWork_owner() public {
-        vm.expectRevert(PrivateVaultBase.NoWork.selector);
+        vm.expectRevert('No work');
         vault.doHardWork();
     }
 
     function test_doHardWork_NoWork_worker() public {
-        vm.expectRevert(PrivateVaultBase.NoWork.selector);
+        vm.expectRevert('No work');
         vault.doHardWork();
     }
 
@@ -207,10 +207,26 @@ contract MockVaultTest is Test {
         assertEq(balanceBefore + amount, balanceAfter);
     }
 
+    function test_salvage_0(uint16 amount) public {
+        payable(address(vault)).transfer(amount);
+        uint balanceBefore = address(this).balance;
+        vault.salvage(0);
+        uint balanceAfter = address(this).balance;
+        assertEq(balanceBefore + amount, balanceAfter);
+    }
+
     function test_salvageERC20(uint16 amount) public {
         asset.transfer(address(vault), amount);
         uint balanceBefore = asset.balanceOf(address(this));
         vault.salvageERC20(address(asset), amount);
+        uint balanceAfter = asset.balanceOf(address(this));
+        assertEq(balanceBefore + amount, balanceAfter);
+    }
+
+    function test_salvageERC20_0(uint16 amount) public {
+        asset.transfer(address(vault), amount);
+        uint balanceBefore = asset.balanceOf(address(this));
+        vault.salvageERC20(address(asset), 0);
         uint balanceAfter = asset.balanceOf(address(this));
         assertEq(balanceBefore + amount, balanceAfter);
     }

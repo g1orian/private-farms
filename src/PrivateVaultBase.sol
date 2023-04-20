@@ -36,10 +36,6 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
     event WorkerChanged(address worker);
     event HardWork(uint profit, uint totalAssetsAfter);
 
-    error NotWorkerOrOwner();
-    error NoWork();
-    error Loss();
-
     // @notice All arguments are used to initialize the contract must be immutable to support cloning (proxy pattern)
     constructor(string memory name_, string memory symbol_, IERC20 asset_, address payable developer_)
     ERC20(name_, symbol_)
@@ -66,7 +62,7 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
     }
 
     modifier onlyWorkerOrOwner() {
-        if (worker != msg.sender && owner() != msg.sender) revert NotWorkerOrOwner();
+        if (worker != msg.sender && owner() != msg.sender) revert('Not worker or owner');
         _;
     }
 
@@ -124,7 +120,9 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
      */
     function salvage(uint amount)
     onlyOwner external {
-        if (amount == 0) amount = address(this).balance;
+        if (amount == 0) {
+            amount = address(this).balance;
+        }
         payable(msg.sender).transfer(amount);
     }
 
@@ -136,7 +134,9 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
      */
     function salvageERC20(address token, uint amount)
     onlyOwner external {
-        if (amount == 0) amount = IERC20(token).balanceOf(address(this));
+        if (amount == 0) {
+            amount = IERC20(token).balanceOf(address(this));
+        }
         IERC20(token).safeTransfer(msg.sender, amount);
     }
 
@@ -228,7 +228,7 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
 
         uint totalAfter = totalAssets();
         // Revert on loss to prevent loss of funds
-        if (totalAfter < totalBefore) revert Loss();
+        if (totalAfter < totalBefore) revert('Loss');
 
         uint profit = totalAfter - totalBefore;
 
@@ -245,7 +245,7 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
 
     /**
      * @dev Do Hard Work common workflow
-     * @notice Must revert with NoWork() when there is no work to do to avoid transaction cost (as Gelato simulates tx before actual run)
+     * @notice Must revert with 'No work' when there is no work to do to avoid transaction cost (as Gelato simulates tx before actual run)
      */
     function _doHardWork() internal virtual {
         // claim rewards (if any)
@@ -256,7 +256,7 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
             _invest(_freeAssets());
         } else {
             // revert to avoid transaction cost
-            revert NoWork();
+            revert('No work');
         }
 
     }

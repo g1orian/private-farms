@@ -48,13 +48,17 @@ contract Shop is Ownable {
             revert WrongValue();
         }
 
-        // transfer 50% to the the affiliate
         address payable userAffiliate = userAffiliates[msg.sender];
-        // if affiliate is set for the user, override affiliate parameter, to use first set affiliate
-        if (userAffiliate != address(0)) affiliate = userAffiliate;
-        if (affiliate != address(0)) {
+        // if affiliate is set for the user, override affiliate parameter, to use first affiliate was set
+        if (userAffiliate != address(0)) {
+            affiliate = userAffiliate;
+        } else if (affiliate != address(0)) {
             // store affiliate for the user's next transactions
             userAffiliates[msg.sender] = affiliate;
+        }
+
+        // transfer 50% to the the affiliate
+        if (affiliate != address(0)) {
             affiliate.transfer(msg.value / 2);
         }
 

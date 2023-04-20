@@ -78,6 +78,15 @@ contract ShopTest is Test {
         assertEq(clone.owner(), address(this));
         assertEq(developer.balance, fee / 4);
         assertEq(affiliate.balance, fee / 2);
+
+        // Second produce should pay to the affiliate, even it not specified
+        clone = Clonable(
+            shop.produce{value: fee}(clonable, initData, zeroAddress)
+        );
+
+        assertEq(clone.owner(), address(this));
+        assertEq(developer.balance, fee / 4 * 2);
+        assertEq(affiliate.balance, fee / 2 * 2);
     }
 
     function test_produceNoAffiliate() public {

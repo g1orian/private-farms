@@ -123,6 +123,11 @@
             "type": "address"
           },
           {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
             "internalType": "string",
             "name": "name",
             "type": "string"
@@ -196,6 +201,11 @@
           {
             "internalType": "address",
             "name": "vault",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "owner",
             "type": "address"
           },
           {

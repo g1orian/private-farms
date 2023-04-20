@@ -8,6 +8,7 @@ interface IPrivateVault {
 
     // @dev who can call doHardWork()
     function worker() external view returns (address);
+    function owner() external view returns (address);
     function asset() external view returns (address);
     function name() external view returns (string memory);
     function symbol() external view returns (string memory);
