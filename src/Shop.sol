@@ -62,11 +62,12 @@ contract Shop is Ownable {
             affiliate.transfer(msg.value / 2);
         }
 
-        // transfer 50% of the balance to the the contract developer
-        address payable developer = clonable.developer();
-        if (developer != address(0)) {
-            developer.transfer(address(this).balance / 2);
-        }
+        // transfer 50% of the balance to the the mother contract developer
+        try clonable.developer() returns (address payable developer) {
+            if (developer != address(0)) {
+                developer.transfer(address(this).balance / 2);
+            }
+        } catch {}
 
         // transfer the rest to the owner
         payable(owner()).transfer(address(this).balance);
