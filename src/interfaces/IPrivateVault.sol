@@ -32,6 +32,9 @@ interface IPrivateVault {
     function withdraw(uint assets, address receiver, address owner)
     external returns (uint shares);
 
+    function redeemAll(address receiver, address owner)
+    external returns (uint assets);
+
     function redeem(uint shares, address receiver, address owner)
     external returns (uint assets);
 

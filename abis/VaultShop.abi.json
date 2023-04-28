@@ -143,6 +143,11 @@
             "type": "address"
           },
           {
+            "internalType": "uint8",
+            "name": "assetDecimals",
+            "type": "uint8"
+          },
+          {
             "internalType": "string",
             "name": "assetSymbol",
             "type": "string"
@@ -175,6 +180,16 @@
           {
             "internalType": "uint256",
             "name": "lastProfit",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "allowance",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "userAssetBalance",
             "type": "uint256"
           }
         ],
@@ -224,6 +239,11 @@
             "type": "address"
           },
           {
+            "internalType": "uint8",
+            "name": "assetDecimals",
+            "type": "uint8"
+          },
+          {
             "internalType": "string",
             "name": "assetSymbol",
             "type": "string"
@@ -256,6 +276,16 @@
           {
             "internalType": "uint256",
             "name": "lastProfit",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "allowance",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "userAssetBalance",
             "type": "uint256"
           }
         ],

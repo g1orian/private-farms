@@ -111,6 +111,12 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
         return super.redeem(shares, receiver, owner);
     }
 
+    function redeemAll(address receiver, address owner)
+    onlyOwner public returns (uint assets) {
+        uint shares = balanceOf(owner);
+        return super.redeem(shares, receiver, owner);
+    }
+
     // ******** SALVAGE *********
 
     /**

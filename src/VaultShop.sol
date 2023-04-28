@@ -17,6 +17,7 @@ contract VaultShop is Shop {
         string name;
         string symbol;
         address asset;
+        uint8 assetDecimals;
         string assetSymbol;
         string assetName;
         uint TVL;
@@ -24,6 +25,8 @@ contract VaultShop is Shop {
         uint lastHardWork;
         uint prevHardWork;
         uint lastProfit;
+        uint allowance;
+        uint userAssetBalance;
     }
 
     function getVaultsInfo(address[] memory vaults)
@@ -45,6 +48,18 @@ contract VaultShop is Shop {
             address asset = vault.asset();
             info[i].asset = asset;
 
+            try IERC20Metadata(asset).decimals() returns (uint8 decimals) {
+                info[i].assetDecimals = decimals;
+            } catch {
+                info[i].assetDecimals = 18;
+            }
+
+            try IERC20Metadata(asset).allowance(msg.sender, address(vault)) returns (uint allowance) {
+                info[i].allowance = allowance;
+            } catch {
+                info[i].allowance = 0;
+            }
+
             try IERC20Metadata(asset).symbol() returns (string memory symbol) {
                 info[i].assetSymbol = symbol;
             } catch {
@@ -55,6 +70,12 @@ contract VaultShop is Shop {
                 info[i].assetName = name;
             } catch {
                 info[i].assetName = "";
+            }
+
+            try IERC20(asset).balanceOf(msg.sender) returns (uint balance) {
+                info[i].userAssetBalance = balance;
+            } catch {
+                info[i].userAssetBalance = 0;
             }
         }
     }
