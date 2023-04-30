@@ -63,27 +63,27 @@ contract MockVaultTest is Test {
         vault.setWorker(developer);
     }
 
-    // doHardWork
+    // doHarvest
 
-    function test_doHardWork_NotWorkerOrOwner() public {
+    function test_doHarvest_NotWorkerOrOwner() public {
         vm.prank(zeroAddress);
         vm.expectRevert('Not worker or owner');
-        vault.doHardWork();
+        vault.doHarvest();
     }
 
-    function test_doHardWork_NoWork_owner() public {
+    function test_doHarvest_NoWork_owner() public {
         vm.expectRevert('No work');
-        vault.doHardWork();
+        vault.doHarvest();
     }
 
-    function test_doHardWork_NoWork_worker() public {
+    function test_doHarvest_NoWork_worker() public {
         vm.expectRevert('No work');
-        vault.doHardWork();
+        vault.doHarvest();
     }
 
-    function test_doHardWork() public {
+    function test_doHarvest() public {
         vault.deposit(1, address(this));
-        vault.doHardWork();
+        vault.doHarvest();
     }
 
     // deposit / withdrawal

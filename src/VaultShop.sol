@@ -22,8 +22,8 @@ contract VaultShop is Shop {
         string assetName;
         uint TVL;
         uint APR;
-        uint lastHardWork;
-        uint prevHardWork;
+        uint lastHarvest;
+        uint prevHarvest;
         uint lastProfit;
         uint allowance;
         uint userAssetBalance;
@@ -41,8 +41,8 @@ contract VaultShop is Shop {
             info[i].symbol = vault.symbol();
             info[i].TVL = vault.totalAssets();
             info[i].APR = vault.APR();
-            info[i].lastHardWork = vault.lastHardWork();
-            info[i].prevHardWork = vault.prevHardWork();
+            info[i].lastHarvest = vault.lastHarvest();
+            info[i].prevHarvest = vault.prevHarvest();
             info[i].lastProfit = vault.lastProfit();
 
             address asset = vault.asset();

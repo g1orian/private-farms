@@ -53,9 +53,9 @@ contract MockVault is PrivateVaultBase {
     /**
      * @dev Set last profit and last hard work for APR calculation testing purposes
      */
-    function setLast(uint lastProfit_, uint lastHardWork_, uint prevHardWork_) external onlyOwner {
+    function setLast(uint lastProfit_, uint lastHarvest_, uint prevHarvest_) external onlyOwner {
         lastProfit = lastProfit_;
-        lastHardWork = lastHardWork_;
-        prevHardWork = prevHardWork_;
+        lastHarvest = lastHarvest_;
+        prevHarvest = prevHarvest_;
     }
 }

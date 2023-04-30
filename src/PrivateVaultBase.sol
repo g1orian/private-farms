@@ -21,20 +21,20 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
     string private _name;
     string private _symbol;
 
-    // @dev who can call doHardWork()
+    // @dev who can call doHarvest()
     address public worker;
 
-    // @dev last time doHardWork() was called. Used to calc APR and APY
-    uint public lastHardWork;
+    // @dev last time doHarvest() was called. Used to calc APR and APY
+    uint public lastHarvest;
 
-    // @dev previous (before last) time doHardWork() was called. Used to calc APR and APY
-    uint public prevHardWork;
+    // @dev previous (before last) time doHarvest() was called. Used to calc APR and APY
+    uint public prevHarvest;
 
-    // @dev last profit (in asset) from doHardWork(). Used to calc APR and APY
+    // @dev last profit (in asset) from doHarvest(). Used to calc APR and APY
     uint public lastProfit;
 
     event WorkerChanged(address worker);
-    event HardWork(uint profit, uint totalAssetsAfter);
+    event Harvest(uint profit, uint totalAssetsAfter);
 
     // @notice All arguments are used to initialize the contract must be immutable to support cloning (proxy pattern)
     constructor(string memory name_, string memory symbol_, IERC20 asset_, address payable developer_)
@@ -213,24 +213,24 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
      * @return APR with 18 decimals
      */
     function APR() public view returns (uint) {
-        uint _prevHardWork = prevHardWork;
-        uint _lastHardWork = lastHardWork;
+        uint _prevHarvest = prevHarvest;
+        uint _lastHarvest = lastHarvest;
         uint _lastProfit = lastProfit;
 
-        if (_prevHardWork == 0 || _lastHardWork == 0 || _lastProfit == 0) return 0;
+        if (_prevHarvest == 0 || _lastHarvest == 0 || _lastProfit == 0) return 0;
 
-        uint period = _lastHardWork - _prevHardWork;
+        uint period = _lastHarvest - _prevHarvest;
         uint yearlyProfit = _lastProfit * 365 days / period;
         return yearlyProfit * 10**18 / totalAssets();
     }
 
     // ******** HARD WORK *********
 
-    function doHardWork()
+    function doHarvest()
     onlyWorkerOrOwner external {
         uint totalBefore = totalAssets();
 
-        _doHardWork();
+        _doHarvest();
 
         uint totalAfter = totalAssets();
         // Revert on loss to prevent loss of funds
@@ -239,10 +239,10 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
         uint profit = totalAfter - totalBefore;
 
         lastProfit = profit;
-        prevHardWork = lastHardWork;
-        lastHardWork = block.timestamp;
+        prevHarvest = lastHarvest;
+        lastHarvest = block.timestamp;
 
-        emit HardWork(profit, totalAfter);
+        emit Harvest(profit, totalAfter);
     }
 
     // *******************************
@@ -253,7 +253,7 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
      * @dev Do Hard Work common workflow
      * @notice Must revert with 'No work' when there is no work to do to avoid transaction cost (as Gelato simulates tx before actual run)
      */
-    function _doHardWork() internal virtual {
+    function _doHarvest() internal virtual {
         // claim rewards (if any)
         _claimRewardsAndConvertToAsset();
         // invest free assets
@@ -292,6 +292,22 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
      *    - check and skip conversion when no rewards
      */
     function _claimRewardsAndConvertToAsset() internal virtual;
+
+    /**
+     * @dev Gelato automation checker function. Gelato can be configured to call doHarvest()
+     *  when this function returns true. It can be used for rebalancing,
+     *  for example or when you need to call doHarvest depending your logic,
+     *  but not every N hours.
+     * @notice https://docs.gelato.network/developer-services/automate/guides/custom-logic-triggers/smart-contract-resolvers
+     * @return canExec can be doHarvest() executed right now?
+     * @return execPayload - should be empty for usual doHarvest call
+     */
+    function canHarvest() external view virtual
+    returns (bool canExec, bytes memory execPayload)
+    {
+        canExec = false;
+        execPayload = '';
+    }
 
 
 }
