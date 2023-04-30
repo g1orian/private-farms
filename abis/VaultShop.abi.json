@@ -169,12 +169,12 @@
           },
           {
             "internalType": "uint256",
-            "name": "lastHardWork",
+            "name": "lastHarvest",
             "type": "uint256"
           },
           {
             "internalType": "uint256",
-            "name": "prevHardWork",
+            "name": "prevHarvest",
             "type": "uint256"
           },
           {
@@ -265,12 +265,12 @@
           },
           {
             "internalType": "uint256",
-            "name": "lastHardWork",
+            "name": "lastHarvest",
             "type": "uint256"
           },
           {
             "internalType": "uint256",
-            "name": "prevHardWork",
+            "name": "prevHarvest",
             "type": "uint256"
           },
           {

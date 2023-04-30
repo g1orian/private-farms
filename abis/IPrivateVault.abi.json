@@ -69,7 +69,7 @@
   },
   {
     "inputs": [],
-    "name": "doHardWork",
+    "name": "doHarvest",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -89,7 +89,7 @@
   },
   {
     "inputs": [],
-    "name": "lastHardWork",
+    "name": "lastHarvest",
     "outputs": [
       {
         "internalType": "uint256",
@@ -165,7 +165,7 @@
   },
   {
     "inputs": [],
-    "name": "prevHardWork",
+    "name": "prevHarvest",
     "outputs": [
       {
         "internalType": "uint256",
