@@ -9,6 +9,8 @@
   },
   "scripts": {
     "test": "forge test -vvv",
+    "test MockVault": "forge test -vvv --mc MockVault",
+    "test Shop": "forge test -vvv --mc Shop",
     "cover": "forge coverage",
     "coverage": "forge coverage --report lcov && perl %GENHTML% -o coverage lcov.info --branch-coverage --function-coverage",
     "report": "start coverage/index.html",

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-// TODO remove file
+// TODO update
 // @title Private Vault Interface
 // @author Bogdoslav
 interface IPrivateVault {
 
-    // @dev who can call doHarvest()
+    // @dev who can call doWork()
     function worker() external view returns (address);
     function owner() external view returns (address);
     function asset() external view returns (address);
@@ -40,7 +40,7 @@ interface IPrivateVault {
 
     // ******** ONLY WORKER OR OWNER *********
 
-    function doHarvest() external;
+    function doWork() external;
 
     // ******** SALVAGE *********
 

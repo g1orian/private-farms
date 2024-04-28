@@ -15,16 +15,15 @@ contract MockVaultTest is Test {
     string symbol = "MV";
     IERC20 asset = new MockERC20("MockAsset", "MA", type(uint256).max);
 
-    address payable public developer = payable(makeAddr("developer"));
-    address payable public zeroAddress = payable(address(0));
+    address payable constant public zeroAddress = payable(address(0));
     address public worker = makeAddr("worker");
 
     event WorkerChanged(address worker);
 
     function setUp() public {
-        vault = new MockVault(name, symbol, asset, developer);
+        vault = new MockVault(address(this), name, symbol, asset);
         vault.setWorker(worker);
-        asset.approve(address(vault), type(uint256).max);
+        asset.approve(address(vault), type(uint).max);
     }
 
     // init clone
@@ -60,30 +59,24 @@ contract MockVaultTest is Test {
 
     function testFail_setWorker() public {
         vm.prank(address(0));
-        vault.setWorker(developer);
+        vault.setWorker(address(0));
     }
 
-    // doHarvest
+    // doWork
 
-    function test_doHarvest_NotWorkerOrOwner() public {
-        vm.prank(zeroAddress);
-        vm.expectRevert('Not worker or owner');
-        vault.doHarvest();
+    function test_doWork_NoWork_owner() public {
+        vm.expectRevert(PrivateVaultBase.NoProfitableWork.selector);
+        vault.doWork();
     }
 
-    function test_doHarvest_NoWork_owner() public {
-        vm.expectRevert('No work');
-        vault.doHarvest();
+    function test_doWork_NoWork_worker() public {
+        vm.expectRevert(PrivateVaultBase.NoProfitableWork.selector);
+        vault.doWork();
     }
 
-    function test_doHarvest_NoWork_worker() public {
-        vm.expectRevert('No work');
-        vault.doHarvest();
-    }
-
-    function test_doHarvest() public {
+    function test_doWork() public {
         vault.deposit(1, address(this));
-        vault.doHarvest();
+        vault.doWork();
     }
 
     // deposit / withdrawal
@@ -108,25 +101,25 @@ contract MockVaultTest is Test {
 
     function test_deposit_NotOwner() public {
         vm.prank(zeroAddress);
-        vm.expectRevert('Ownable: caller is not the owner');
+        vm.expectRevert(Cloneable.NotOwner.selector);
         vault.deposit(1, address(this));
     }
 
     function test_withdraw_NotOwner() public {
         vm.prank(zeroAddress);
-        vm.expectRevert('Ownable: caller is not the owner');
+        vm.expectRevert(Cloneable.NotOwner.selector);
         vault.withdraw(1, address(this), address(this));
     }
 
     function test_mint_NotOwner() public {
         vm.prank(zeroAddress);
-        vm.expectRevert('Ownable: caller is not the owner');
+        vm.expectRevert(Cloneable.NotOwner.selector);
         vault.mint(1, address(this));
     }
 
     function test_redeem_NotOwner() public {
         vm.prank(zeroAddress);
-        vm.expectRevert('Ownable: caller is not the owner');
+        vm.expectRevert(Cloneable.NotOwner.selector);
         vault.redeem(1, address(this), address(this));
     }
 
@@ -183,20 +176,14 @@ contract MockVaultTest is Test {
 
     function test_salvage_NotOwner() public {
         vm.prank(zeroAddress);
-        vm.expectRevert('Ownable: caller is not the owner');
+        vm.expectRevert(Cloneable.NotOwner.selector);
         vault.salvage(1);
     }
 
     function test_salvageERC20_NotOwner() public {
         vm.prank(zeroAddress);
-        vm.expectRevert('Ownable: caller is not the owner');
+        vm.expectRevert(Cloneable.NotOwner.selector);
         vault.salvageERC20(address(asset), 1);
-    }
-
-    function test_salvageERC721_NotOwner() public {
-        vm.prank(zeroAddress);
-        vm.expectRevert('Ownable: caller is not the owner');
-        vault.salvageERC721(address(asset), 0);
     }
 
     function test_salvage(uint16 amount) public {
@@ -236,15 +223,5 @@ contract MockVaultTest is Test {
         return IERC721Receiver.onERC721Received.selector;
     }
 
-    function test_salvageERC721(uint8 tokenId) public {
-        MockERC721 nft = new MockERC721("MockNFT", "NFT", tokenId);
-        assertEq(nft.ownerOf(tokenId), address(this));
-
-        nft.safeTransferFrom(address(this), address(vault), tokenId);
-        assertEq(nft.ownerOf(tokenId), address(vault));
-
-        vault.salvageERC721(address(nft), tokenId);
-        assertEq(nft.ownerOf(tokenId), address(this));
-    }
 
 }

@@ -3,7 +3,7 @@ pragma solidity ^0.8.18;
 
 import "forge-std/Test.sol";
 import "../src/VaultShop.sol";
-import "../src/Clonable.sol";
+import "../src/Cloneable.sol";
 import "../src/mocks/MockERC20.sol";
 import "../src/mocks/MockVault.sol";
 
@@ -12,7 +12,6 @@ contract ShopTest is Test {
     VaultShop public shop;
     MockVault public vault;
     IERC20 asset = new MockERC20("MockAsset", "MA", type(uint256).max);
-    address payable public developer = payable(makeAddr("developer"));
     address payable public affiliate = payable(makeAddr("affiliate"));
     address payable public zeroAddress = payable(address(0));
 
@@ -22,8 +21,7 @@ contract ShopTest is Test {
     function setUp() public {
         shop = new VaultShop();
 
-        vault = new MockVault('MockVault', 'MV', asset, developer);
-        vault.transferOwnership(address(shop));
+        vault = new MockVault(address(shop), 'MockVault', 'MV', asset);
 
     }
 

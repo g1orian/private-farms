@@ -8,12 +8,12 @@ import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 import "openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
 import "openzeppelin-contracts/contracts/token/ERC721/IERC721Receiver.sol";
 
-import "./Clonable.sol";
+import "./Cloneable.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 // @title Base Private Vault Contract
 // @author Bogdoslav
-abstract contract PrivateVaultBase is Clonable, ERC4626 {
+abstract contract PrivateVaultBase is Cloneable, ERC4626 {
     using SafeERC20 for IERC20;
 
     // @dev name and symbol are moved from ERC20 here to support cloning (proxy pattern)
@@ -21,26 +21,29 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
     string private _name;
     string private _symbol;
 
-    // @dev who can call doHarvest()
+    // @dev who can call doWork()
     address public worker;
 
-    // @dev last time doHarvest() was called. Used to calc APR and APY
+    // @dev last time doWork() was called. Used to calc APR and APY
     uint public lastHarvest;
 
-    // @dev previous (before last) time doHarvest() was called. Used to calc APR and APY
+    // @dev previous (before last) time doWork() was called. Used to calc APR and APY
     uint public prevHarvest;
 
-    // @dev last profit (in asset) from doHarvest(). Used to calc APR and APY
+    // @dev last profit (in asset) from doWork(). Used to calc APR and APY
     uint public lastProfit;
 
     event WorkerChanged(address worker);
     event Harvest(uint profit, uint totalAssetsAfter);
 
+    error NoProfitableWork();
+    error NotOwnerOrWorker();
+
     // @notice All arguments are used to initialize the contract must be immutable to support cloning (proxy pattern)
-    constructor(string memory name_, string memory symbol_, IERC20 asset_, address payable developer_)
+    constructor(address owner_, string memory name_, string memory symbol_, IERC20 asset_)
     ERC20(name_, symbol_)
     ERC4626(asset_)
-    Clonable(developer_)
+    Cloneable(owner_)
     {
         _name = name_;
         _symbol = symbol_;
@@ -62,15 +65,15 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
     }
 
     modifier onlyWorkerOrOwner() {
-        if (worker != msg.sender && owner() != msg.sender) revert('Not worker or owner');
+        if (msg.sender != worker && msg.sender != owner) revert NotOwnerOrWorker();
         _;
     }
 
-    function _initCloneWithData(address mother, bytes memory initData)
+    function _initCloneWithData(address source, bytes memory initData)
     internal override virtual {
-        // copy name and symbol from mother as they are not immutable in ERC20
-        _name = PrivateVaultBase(payable(mother)).name();
-        _symbol = PrivateVaultBase(payable(mother)).symbol();
+        // copy name and symbol from source as they are not immutable in ERC20
+        _name = PrivateVaultBase(payable(source)).name();
+        _symbol = PrivateVaultBase(payable(source)).symbol();
         // skip initialization if no data provided, as worker can be set later
         if (initData.length == 0)
             return;
@@ -146,24 +149,9 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
         IERC20(token).safeTransfer(msg.sender, amount);
     }
 
-    /**
-     * @dev Salvage any ERC721 token from this contract.
-     * @param token address of the token to salvage
-     * @param tokenId id of the token to salvage
-     */
-    function salvageERC721(address token, uint tokenId)
-    onlyOwner external {
-        IERC721(token).safeTransferFrom(address(this), msg.sender, tokenId);
-    }
-
     // ******** RECEIVE *********
 
     receive() external payable {}
-
-    function onERC721Received(address /*operator*/, address /*from*/, uint256 /*tokenId*/, bytes memory /*data*/)
-    external virtual pure returns (bytes4) {
-        return IERC721Receiver.onERC721Received.selector;
-    }
 
     // ******** DEPOSIT / WITHDRAW ********
 
@@ -226,11 +214,11 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
 
     // ******** HARD WORK *********
 
-    function doHarvest()
-    onlyWorkerOrOwner external {
+    function doWork()
+    external virtual {
         uint totalBefore = totalAssets();
 
-        _doHarvest();
+        _doWork();
 
         uint totalAfter = totalAssets();
         // Revert on loss to prevent loss of funds
@@ -251,9 +239,9 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
 
     /**
      * @dev Do Hard Work common workflow
-     * @notice Must revert with 'No work' when there is no work to do to avoid transaction cost (as Gelato simulates tx before actual run)
+     * @notice Must revert with NoProfitableWork() when there is no work to do to avoid transaction cost (as Gelato simulates tx before actual run)
      */
-    function _doHarvest() internal virtual {
+    function _doWork() internal virtual {
         // claim rewards (if any)
         _claimRewardsAndConvertToAsset();
         // invest free assets
@@ -262,7 +250,7 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
             _invest(_freeAssets());
         } else {
             // revert to avoid transaction cost
-            revert('No work');
+            revert NoProfitableWork();
         }
 
     }
@@ -294,13 +282,13 @@ abstract contract PrivateVaultBase is Clonable, ERC4626 {
     function _claimRewardsAndConvertToAsset() internal virtual;
 
     /**
-     * @dev Gelato automation checker function. Gelato can be configured to call doHarvest()
-     *  when this function returns true. It can be used for rebalancing,
-     *  for example or when you need to call doHarvest depending your logic,
-     *  but not every N hours.
+     * @dev Gelato automation checker function. Gelato can be configured to call doWork()
+     *  when this function returns true. It can be used for re-balancing,
+     *  for example or when you need to call doWork depending your logic,
+     *  and not just every N hours.
      * @notice https://docs.gelato.network/developer-services/automate/guides/custom-logic-triggers/smart-contract-resolvers
-     * @return canExec can be doHarvest() executed right now?
-     * @return execPayload - should be empty for usual doHarvest call
+     * @return canExec can be doWork() executed right now?
+     * @return execPayload - should be empty for usual doWork call
      */
     function canHarvest() external view virtual
     returns (bool canExec, bytes memory execPayload)

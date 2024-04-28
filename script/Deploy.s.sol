@@ -24,15 +24,15 @@ contract MockDeploy is Script {
         console.log('asset1', address(asset1));
         console.log('asset2', address(asset2));
 
-        MockVault vault0 = new MockVault("MockVault0", "MV0", asset0, zeroAddress);
-        MockVault vault1 = new MockVault("MockVault1", "MV1", asset1, zeroAddress);
-        MockVault vault2 = new MockVault("MockVault2", "MV2", asset2, zeroAddress);
+        MockVault vault0 = new MockVault(address(shop), "MockVault0", "MV0", asset0);
+        MockVault vault1 = new MockVault(address(shop), "MockVault1", "MV1", asset1);
+        MockVault vault2 = new MockVault(address(shop), "MockVault2", "MV2", asset2);
         console.log('vault0', address(vault0));
         console.log('vault1', address(vault1));
         console.log('vault2', address(vault2));
-        vault0.transferOwnership(address(shop));
-        vault1.transferOwnership(address(shop));
-        vault2.transferOwnership(address(shop));
+//        vault0.transferOwnership(address(shop));
+//        vault1.transferOwnership(address(shop));
+//        vault2.transferOwnership(address(shop));
 
         shop.produce(vault0, '', zeroAddress);
         shop.produce(vault1, '', zeroAddress);

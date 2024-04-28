@@ -1,15 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
+// TODO update
 // @author Bogdoslav
-interface IClonable {
+interface ICloneable {
     /**
-     * @dev address of the contract developer (to share revenue)
-     */
-    function developer() external returns (address payable);
-
-    /**
-     * @notice call on mother contract
+     * @notice call on source contract
      * @param client address of the new contract owner
      * @param initData data to init new contract
      */
@@ -20,5 +16,5 @@ interface IClonable {
      * @param client address of the new contract owner
      * @param initData data to init new contract
      */
-    function initClone(address client, address mother, bytes memory initData) external;
+    function initClone(address client, address source, bytes memory initData) external;
 }

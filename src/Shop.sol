@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import "./interfaces/IClonable.sol";
+import "./interfaces/ICloneable.sol";
 import "openzeppelin-contracts/contracts/access/Ownable.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
@@ -18,7 +18,7 @@ contract Shop is Ownable {
     event Produced(address indexed source, address clone, address indexed user, address indexed affiliate, uint feePaid);
     event FeeChanged(uint fee);
 
-    error WrongValue();
+    error WrongFeeValue();
 
     /**
      * @dev Set fee for cloning
@@ -39,13 +39,13 @@ contract Shop is Ownable {
 
     /**
      * @dev Deploy new clone contract
-     * @param clonable address of the contract to clone
+     * @param cloneable address of the contract to clone
      * @param initData data to init new contract
      */
-    function produce(IClonable clonable, bytes memory initData, address payable affiliate)
+    function produce(ICloneable cloneable, bytes memory initData, address payable affiliate)
     external payable returns (address clonedContract) {
         if (msg.value != fee) {
-            revert WrongValue();
+            revert WrongFeeValue();
         }
 
         address payable userAffiliate = userAffiliates[msg.sender];
@@ -62,21 +62,14 @@ contract Shop is Ownable {
             affiliate.transfer(msg.value / 2);
         }
 
-        // transfer 50% of the balance to the the mother contract developer
-        try clonable.developer() returns (address payable developer) {
-            if (developer != address(0)) {
-                developer.transfer(address(this).balance / 2);
-            }
-        } catch {}
-
         // transfer the rest to the owner
         payable(owner()).transfer(address(this).balance);
 
         address user = msg.sender;
-        clonedContract = clonable.clone(user, initData);
+        clonedContract = cloneable.clone(user, initData);
         // push deployed contract address to the storage
         userContracts[user].push(clonedContract);
-        emit Produced(address(clonable), clonedContract, user, affiliate, msg.value);
+        emit Produced(address(cloneable), clonedContract, user, affiliate, msg.value);
     }
 
     // ******** UI HELPER FUNCTIONS  ********
@@ -93,6 +86,6 @@ contract Shop is Ownable {
     /**
      * @dev Gap for new variables to be added
      */
-    uint256[49] private __gap;
+    uint256[32] private __gap;
 
 }

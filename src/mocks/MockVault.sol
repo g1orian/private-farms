@@ -12,10 +12,9 @@ contract MockVault is PrivateVaultBase {
      * @param name_ name of the vault
      * @param symbol_ symbol of the vault
      * @param asset_ address of the vault asset
-     * @param developer_ address of the contract developer (to share revenue)
      */
-    constructor(string memory name_, string memory symbol_, IERC20 asset_, address payable developer_)
-    PrivateVaultBase(name_, symbol_, asset_, developer_) {
+    constructor(address owner_, string memory name_, string memory symbol_, IERC20 asset_)
+    PrivateVaultBase(owner_, name_, symbol_, asset_) {
     }
 
     /**
