@@ -9,7 +9,7 @@ interface ICloneable {
      * @param client address of the new contract owner
      * @param initData data to init new contract
      */
-    function clone(address client, bytes memory initData) external returns (address newClone);
+    function clone(address client, bytes memory initData) external returns (address payable newClone);
 
     /**
      * @notice call on cloned contract

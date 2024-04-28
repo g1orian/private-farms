@@ -29,6 +29,9 @@ contract VaultShop is Shop {
         uint userAssetBalance;
     }
 
+    /// constructor() {}
+    /// @dev This contract is proxy-compatible, so it should not have constructor, use init(..) instead
+
     function getVaultsInfo(address[] memory vaults)
     public view returns (VaultInfo[] memory info) {
         uint len = vaults.length;

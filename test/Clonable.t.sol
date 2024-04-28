@@ -17,6 +17,7 @@ contract CloneableTest is Test {
     function test_clone() public {
         Cloneable clone = Cloneable(
             cloneable.clone(address(this), ''));
+        // TODO
     }
 
     event Cloned(address cloneContract, address indexed forClient);

@@ -10,6 +10,7 @@ contract Cloneable is ICloneable {
 
     /// @dev true if this is source (not cloned) contract
     bool private sourceContract; // it will be false at cloned contracts
+    address public sourceAddress;
     address public owner;
 
     event Cloned(address cloneContract, address indexed forClient);
@@ -38,11 +39,11 @@ contract Cloneable is ICloneable {
      * @param initData data to init new contract
      */
     function clone(address cloneOwner, bytes memory initData)
-    onlyOwner external override returns (address newClone) {
+    onlyOwner external override returns (address payable newClone) {
         // Prevent cloning clones
         if (!sourceContract) revert NotSourceContract();
 
-        newClone = Clones.clone(address(this));
+        newClone = payable(Clones.clone(address(this)));
         ICloneable(newClone).initClone(cloneOwner, address(this), initData);
         emit Cloned(newClone, cloneOwner);
     }
@@ -57,14 +58,15 @@ contract Cloneable is ICloneable {
         if (owner != address(0)) revert AlreadyInitialized();
 
         owner = cloneOwner;
-        _initCloneWithData(source, initData);
+        sourceAddress = source;
+        _initCloneWithData(initData);
     }
 
     /**
      * @dev Override this function to init clone with specific data
      * @param initData data to init new contract
      */
-    function _initCloneWithData(address /*source*/, bytes memory initData)
+    function _initCloneWithData(bytes memory initData)
     internal virtual {
         if (initData.length != 0) {
             revert WrongInitData();

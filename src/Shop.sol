@@ -2,12 +2,13 @@
 pragma solidity ^0.8.13;
 
 import "./interfaces/ICloneable.sol";
-import "openzeppelin-contracts/contracts/access/Ownable.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 // @dev Cloning Shop Contract
 // @author Bogdoslav
-contract Shop is Ownable {
+contract Shop {
+    // @dev owner
+    address payable public owner;
     // @dev fee for cloning
     uint public fee;
     // @dev user => contracts
@@ -19,22 +20,33 @@ contract Shop is Ownable {
     event FeeChanged(uint fee);
 
     error WrongFeeValue();
+    error NotOwner();
+
+    modifier onlyOwner() {
+        if (msg.sender != owner) revert NotOwner();
+        _;
+    }
+
+    /// constructor() {}
+    /// @dev This contract is proxy-compatible, so it should not have constructor, use init(..) instead
+    function initShop(address payable owner_, uint fee_)
+    external {
+        owner = owner_;
+        _setFee(fee_);
+    }
+
+    function _setFee(uint fee_)
+    internal {
+        fee = fee_;
+        emit FeeChanged(fee_);
+    }
 
     /**
      * @dev Set fee for cloning
      */
     function setFee(uint fee_)
     onlyOwner public {
-        fee = fee_;
-        emit FeeChanged(fee_);
-    }
-
-    /**
-     * @dev Transfer ownership of the contract to the owner of the shop
-     */
-    function returnOwnership(address contractAddress)
-    onlyOwner public {
-        Ownable(contractAddress).transferOwnership(msg.sender);
+        _setFee(fee_);
     }
 
     /**
@@ -63,7 +75,7 @@ contract Shop is Ownable {
         }
 
         // transfer the rest to the owner
-        payable(owner()).transfer(address(this).balance);
+        payable(owner).transfer(address(this).balance);
 
         address user = msg.sender;
         clonedContract = cloneable.clone(user, initData);

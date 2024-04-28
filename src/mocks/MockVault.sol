@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
+import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "../PrivateVaultBase.sol";
 
 // @title Mock Private Vault Contract
@@ -14,7 +15,7 @@ contract MockVault is PrivateVaultBase {
      * @param asset_ address of the vault asset
      */
     constructor(address owner_, string memory name_, string memory symbol_, IERC20 asset_)
-    PrivateVaultBase(owner_, name_, symbol_, asset_) {
+    PrivateVaultBase(owner_, asset_) {
     }
 
     /**

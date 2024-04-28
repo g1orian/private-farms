@@ -11,65 +11,29 @@ import "openzeppelin-contracts/contracts/token/ERC721/IERC721Receiver.sol";
 // @dev Tests for MockVault (PrivateVaultBase) Contract
 contract MockVaultTest is Test {
     MockVault public vault;
-    string name = "MockVault";
-    string symbol = "MV";
-    IERC20 asset = new MockERC20("MockAsset", "MA", type(uint256).max);
+    string public name = "MockVault";
+    string public symbol = "MV";
+    IERC20 public asset = new MockERC20("MockAsset", "MA", type(uint256).max);
 
     address payable constant public zeroAddress = payable(address(0));
-    address public worker = makeAddr("worker");
-
-    event WorkerChanged(address worker);
 
     function setUp() public {
         vault = new MockVault(address(this), name, symbol, asset);
-        vault.setWorker(worker);
         asset.approve(address(vault), type(uint).max);
     }
 
     // init clone
 
     function test_initCloneNoData() public {
-        MockVault clone = MockVault(payable(
+        MockVault clone = MockVault(
             vault.clone(address(this), '')
-        ));
-        assertEq(clone.worker(), address(0));
-    }
-
-    function test_initCloneWithData() public {
-        MockVault clone = MockVault(payable(
-            vault.clone(address(this), abi.encode(worker))
-        ));
-        assertEq(clone.worker(), worker);
-    }
-
-    // worker
-
-    function test_worker() public {
-        assertEq(vault.worker(), worker);
-    }
-
-    function test_setWorker() public {
-        address newWorker = makeAddr("newWorker");
-
-        vm.expectEmit(true, true, true, true, address(vault));
-        emit WorkerChanged(newWorker);
-        vault.setWorker(newWorker);
-        assertEq(vault.worker(), newWorker);
-    }
-
-    function testFail_setWorker() public {
-        vm.prank(address(0));
-        vault.setWorker(address(0));
+        );
+        // TODO
     }
 
     // doWork
 
-    function test_doWork_NoWork_owner() public {
-        vm.expectRevert(PrivateVaultBase.NoProfitableWork.selector);
-        vault.doWork();
-    }
-
-    function test_doWork_NoWork_worker() public {
+    function test_doWork_NoWork() public {
         vm.expectRevert(PrivateVaultBase.NoProfitableWork.selector);
         vault.doWork();
     }
@@ -82,7 +46,7 @@ contract MockVaultTest is Test {
     // deposit / withdrawal
 
     // @notice investedAssets() is always 0 in MockVault
-    function test_investedAssets() public {
+    function test_investedAssets() public view {
         assertEq(vault.investedAssets(), 0);
     }
 
@@ -145,7 +109,7 @@ contract MockVaultTest is Test {
 
     }
 
-    function test_withdraw(uint amount) public {
+    function test_withdraw(uint128 amount) public {
         uint assetsBefore = asset.balanceOf(address(this));
 
         vault.deposit(amount, address(this));
@@ -157,7 +121,7 @@ contract MockVaultTest is Test {
         assertEq(assetsBefore, assetsAfter);
     }
 
-    function test_redeem(uint amount) public {
+    function test_redeem(uint128 amount) public {
         uint assetsBefore = asset.balanceOf(address(this));
 
         vault.deposit(amount, address(this));

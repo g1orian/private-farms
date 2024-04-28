@@ -16,11 +16,6 @@ import "openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.s
 abstract contract PrivateVaultBase is Cloneable, ERC4626 {
     using SafeERC20 for IERC20;
 
-    // @dev name and symbol are moved from ERC20 here to support cloning (proxy pattern)
-    // @notice as they are not immutable in ERC20, they are not supported by Clones
-    string private _name;
-    string private _symbol;
-
     // @dev who can call doWork()
     address public worker;
 
@@ -40,20 +35,18 @@ abstract contract PrivateVaultBase is Cloneable, ERC4626 {
     error NotOwnerOrWorker();
 
     // @notice All arguments are used to initialize the contract must be immutable to support cloning (proxy pattern)
-    constructor(address owner_, string memory name_, string memory symbol_, IERC20 asset_)
-    ERC20(name_, symbol_)
+    constructor(address owner_, IERC20 asset_)
+    ERC20('', '') // We are overriding name() and symbol() virtual functions
     ERC4626(asset_)
     Cloneable(owner_)
     {
-        _name = name_;
-        _symbol = symbol_;
     }
 
     /**
      * @dev Returns the name of the token.
      */
     function name() public view virtual override (ERC20, IERC20Metadata) returns (string memory) {
-        return _name;
+        return 'PrivateVaultBase';
     }
 
     /**
@@ -61,38 +54,14 @@ abstract contract PrivateVaultBase is Cloneable, ERC4626 {
      * name.
      */
     function symbol() public view virtual override (ERC20, IERC20Metadata) returns (string memory) {
-        return _symbol;
+        return 'PVB';
     }
 
-    modifier onlyWorkerOrOwner() {
-        if (msg.sender != worker && msg.sender != owner) revert NotOwnerOrWorker();
-        _;
-    }
-
-    function _initCloneWithData(address source, bytes memory initData)
-    internal override virtual {
-        // copy name and symbol from source as they are not immutable in ERC20
-        _name = PrivateVaultBase(payable(source)).name();
-        _symbol = PrivateVaultBase(payable(source)).symbol();
-        // skip initialization if no data provided, as worker can be set later
-        if (initData.length == 0)
-            return;
-        address worker_ = abi.decode(initData, (address));
-        _setWorker(worker_);
-    }
-
-    function _setWorker(address worker_)
-    internal {
-        worker = worker_;
-        emit WorkerChanged(worker_);
-    }
+//    function _initCloneWithData(address source, bytes memory initData)
+//    internal override virtual {
+//    }
 
     // ******** ONLY OWNER *********
-
-    function setWorker(address worker_)
-    onlyOwner public {
-        _setWorker(worker_);
-    }
 
     function deposit(uint assets, address receiver)
     onlyOwner public override returns (uint shares) {

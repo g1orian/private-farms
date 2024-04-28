@@ -8,12 +8,14 @@ import "../src/mocks/MockERC20.sol";
 import "../src/mocks/MockVault.sol";
 
 contract MockDeploy is Script {
-    address payable zeroAddress = payable(address(0));
+    address payable private zeroAddress = payable(address(0));
     function run() external {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        uint deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
+        uint fee = 250e18;
 
         VaultShop shop = new VaultShop();
+        shop.initShop(payable(address(this)), fee);
         console.log('shop', address(shop));
 
         uint amount = 1000000 * 10**18;
@@ -30,14 +32,9 @@ contract MockDeploy is Script {
         console.log('vault0', address(vault0));
         console.log('vault1', address(vault1));
         console.log('vault2', address(vault2));
-//        vault0.transferOwnership(address(shop));
-//        vault1.transferOwnership(address(shop));
-//        vault2.transferOwnership(address(shop));
 
         shop.produce(vault0, '', zeroAddress);
         shop.produce(vault1, '', zeroAddress);
-
-        shop.setFee(250 * 10**18);
 
         vm.stopBroadcast();
     }

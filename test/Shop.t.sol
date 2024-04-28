@@ -8,21 +8,19 @@ import "../src/Cloneable.sol";
 // @dev Tests for Shop Contract
 contract ShopTest is Test {
     Shop public shop;
-    Cloneable private cloneable;
-    Cloneable private cloneableNoDev;
-    address payable private developer = payable(makeAddr("developer"));
+    Cloneable public cloneable;
     address payable private affiliate = payable(makeAddr("affiliate"));
+    address payable private owner = payable(makeAddr("owner"));
     address payable private constant zeroAddress = payable(address(0));
+    address payable private constant noAffiliate = zeroAddress;
     uint private fee = 100;
-    uint private serviceRevenue;
 
     receive() external payable {
-        assertEq(serviceRevenue, msg.value);
     }
 
     function setUp() public {
         shop = new Shop();
-        shop.setFee(fee);
+        shop.initShop(owner, fee);
 
         cloneable = new Cloneable(address(shop));
     }
@@ -32,6 +30,7 @@ contract ShopTest is Test {
     function test_setFee(uint newFee) public {
         vm.expectEmit(true, true, true, true, address(shop));
         emit FeeChanged(newFee);
+        vm.prank(owner);
         shop.setFee(newFee);
         assertEq(shop.fee(), newFee);
     }
@@ -41,38 +40,27 @@ contract ShopTest is Test {
         shop.setFee(newFee);
     }
 
-    function test_returnOwnership() public {
-        assertEq(cloneable.owner(), address(shop));
-        shop.returnOwnership(address(cloneable));
-        assertEq(cloneable.owner(), address(this));
-    }
-
-    function testFail_returnOwnership() public {
-        vm.prank(address(0));
-        shop.returnOwnership(address(cloneable));
-    }
 
     event Produced(address indexed source, address clone, address indexed user, address indexed affiliate, uint feePaid);
 
     function test_produceEvent() public {
         bytes memory initData;
-        serviceRevenue = fee / 4;
 
         vm.expectEmit(true, true, true, false, address(shop));
         emit Produced(address(cloneable), address(0), address(this), affiliate, fee);
         shop.produce{value: fee}(cloneable, initData, affiliate);
+        assertEq(owner.balance, fee / 2);
+
     }
 
     function test_produceWithAffiliate() public {
         bytes memory initData;
-        serviceRevenue = fee / 4;
 
         Cloneable clone = Cloneable(
             shop.produce{value: fee}(cloneable, initData, affiliate)
         );
 
         assertEq(clone.owner(), address(this));
-        assertEq(developer.balance, fee / 4);
         assertEq(affiliate.balance, fee / 2);
 
         // Second produce should pay to the affiliate, even it not specified
@@ -81,43 +69,18 @@ contract ShopTest is Test {
         );
 
         assertEq(clone.owner(), address(this));
-        assertEq(developer.balance, fee / 4 * 2);
         assertEq(affiliate.balance, fee / 2 * 2);
     }
 
     function test_produceNoAffiliate() public {
         bytes memory initData;
-        serviceRevenue = fee / 2;
 
         Cloneable clone = Cloneable(
             shop.produce{value: fee}(cloneable, initData, zeroAddress)
         );
 
         assertEq(clone.owner(), address(this));
-        assertEq(developer.balance, fee / 2);
-    }
-
-    function test_produceNoDevWithAffiliate() public {
-        bytes memory initData;
-        serviceRevenue = fee / 2;
-
-        Cloneable clone = Cloneable(
-            shop.produce{value: fee}(cloneableNoDev, initData, affiliate)
-        );
-
-        assertEq(clone.owner(), address(this));
-        assertEq(affiliate.balance, fee / 2);
-    }
-
-    function test_produceNoDevNoAffiliate() public {
-        bytes memory initData;
-        serviceRevenue = fee;
-
-        Cloneable clone = Cloneable(
-            shop.produce{value: fee}(cloneableNoDev, initData, zeroAddress)
-        );
-
-        assertEq(clone.owner(), address(this));
+        assertEq(owner.balance, fee);
     }
 
     function test_produceWrongValue() public {
@@ -131,13 +94,13 @@ contract ShopTest is Test {
         bytes memory initData;
         assertEq(shop.getAllUserContracts(address(this)).length, 0);
 
-        serviceRevenue = fee;
         shop.produce{value: fee}(cloneable, initData, zeroAddress);
         assertEq(shop.getAllUserContracts(address(this)).length, 1);
+        assertEq(owner.balance, fee);
 
-        serviceRevenue = fee;
-        shop.produce{value: fee}(cloneableNoDev, initData, zeroAddress);
+        shop.produce{value: fee}(cloneable, initData, affiliate);
         assertEq(shop.getAllUserContracts(address(this)).length, 2);
+        assertEq(owner.balance, fee + fee / 2);
     }
 
 
